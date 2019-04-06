@@ -1,102 +1,102 @@
 package main
-
+    
 import (
-	"container/list"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"strconv"
-	"strings"
-	"encoding/csv"
-	"os"
-	"flag"
-	"time"
-	"sort"
+    "container/list"
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "log"
+    "net/http"
+    "strconv"
+    "strings"
+    "encoding/csv"
+    "os"
+    "flag"
+    "time"
+    "sort"
 )
 
 
 /* 定义sina基金的json格式 */
 type SA struct {
-	name string
-	age  int
+    name string
+    age  int
 }
 
 type JiJinCode struct {
-	Code int
+    Code int
 }
 
 type JiJinStatus struct {
-	Status JiJinCode
+    Status JiJinCode
 }
 
 type JiJinData struct {
-	Fbrq string
-	Jjjz string
-	Ljjz string
+    Fbrq string
+    Jjjz string
+    Ljjz string
 }
 
 type JiJinDataArray struct {
-	Data      []JiJinData
-	Total_num string
+    Data      []JiJinData
+    Total_num string
 }
 
 type JiJinDataResult struct {
-	Status JiJinCode
-	Data   JiJinDataArray
+    Status JiJinCode
+    Data   JiJinDataArray
 }
 
 type JiJinResult struct {
-	Result JiJinDataResult
+    Result JiJinDataResult
 }
 
 
 func GetFundDataFromSina(fundCode string, fundPage int, fundDataList *list.List) int {
 
-	var fundUrl = "http://stock.finance.sina.com.cn/fundInfo/api/openapi.php/CaihuiFundInfoService.getNav?symbol=CODE&page=PAGE"
-	fundPageStr := strconv.Itoa(fundPage)
+    var fundUrl = "http://stock.finance.sina.com.cn/fundInfo/api/openapi.php/CaihuiFundInfoService.getNav?symbol=CODE&page=PAGE"
+    fundPageStr := strconv.Itoa(fundPage)
 
-	fundUrl = strings.Replace(fundUrl, "CODE", fundCode, -1)
-	fundUrl = strings.Replace(fundUrl, "PAGE", fundPageStr, -1)
+    fundUrl = strings.Replace(fundUrl, "CODE", fundCode, -1)
+    fundUrl = strings.Replace(fundUrl, "PAGE", fundPageStr, -1)
 
-	log.Println("读取URL:" + fundUrl)
+    log.Println("读取URL:" + fundUrl)
 
-	httpClient := &http.Client{Timeout:5*time.Second,}
-	req, err := http.NewRequest("POST", fundUrl, strings.NewReader(""))
-	//req.Header.Add("Con")
+    httpClient := &http.Client{Timeout:5*time.Second,}
+    req, err := http.NewRequest("POST", fundUrl, strings.NewReader(""))
+    //req.Header.Add("Con")
 
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		log.Println(err)
-		return  -1
-	}
+    resp, err := httpClient.Do(req)
+    if err != nil {
+        log.Println(err)
+        return  -1
+    }
 
-	//def resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		return -2
-	}
+    //def resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        log.Println(err)
+        return -2
+    }
 
-	json_str := string(body)
-	//fmt.Println(json_str)
+    json_str := string(body)
+    //fmt.Println(json_str)
 
-	var data JiJinResult
-	if err := json.Unmarshal([]byte(json_str), &data); err == nil {
+    var data JiJinResult
+    if err := json.Unmarshal([]byte(json_str), &data); err == nil {
 
-		count := len(data.Result.Data.Data)
-		for i := 0; i < count; i++ {
-			data1 := data.Result.Data.Data[i]
-			//fmt.Println(data1.Fbrq, data1.Jjjz, data1.Ljjz)
-			fundDataList.PushBack(data1)
-		}
+        count := len(data.Result.Data.Data)
+        for i := 0; i < count; i++ {
+            data1 := data.Result.Data.Data[i]
+            //fmt.Println(data1.Fbrq, data1.Jjjz, data1.Ljjz)
+            fundDataList.PushBack(data1)
+        }
 
-		return count
-	} else {
-		fmt.Println(err)
-		return -3
-	}
+        return count
+    } else {
+        fmt.Println(err)
+        return -3
+    }
 }
 
 func GetFailPageAgain(failPage *list.List, funcCode string, fundDataList *list.List) {
@@ -116,7 +116,7 @@ func GetFailPageAgain(failPage *list.List, funcCode string, fundDataList *list.L
     }
   }
 }
-
+    
 //对[][]string排序
 type FundDataSlice [][]string
 
@@ -130,171 +130,171 @@ func (a FundDataSlice) Swap(i, j int){     // 重写 Swap() 方法
 
 func (a FundDataSlice) Less(i, j int) bool {    // 重写 Less() 方法， 从大到小排序
 
-	tm1, _ := time.Parse("2006-01-02 15:04:05", a[i][0])
-	tm2, _ := time.Parse("2006-01-02 15:04:05", a[j][0])
+    tm1, _ := time.Parse("2006-01-02 15:04:05", a[i][0])
+    tm2, _ := time.Parse("2006-01-02 15:04:05", a[j][0])
 
     return tm2.After(tm1)
 }
 
 func WriteFundDataToCsv_1(fileName string, fundDataList *list.List) {
-	var oldData [][]string
+    var oldData [][]string
 
-	//读取老数据
-	readContent,err := ioutil.ReadFile(fileName)
-	if err == nil {
-		csvReadFp := csv.NewReader(strings.NewReader(string(readContent)))
-		oldData,_ = csvReadFp.ReadAll()
-		log.Println("读取到老数据条目数：",len(oldData))
-	}
+    //读取老数据
+    readContent,err := ioutil.ReadFile(fileName)
+    if err == nil {
+        csvReadFp := csv.NewReader(strings.NewReader(string(readContent)))
+        oldData,_ = csvReadFp.ReadAll()
+        log.Println("读取到老数据条目数：",len(oldData))
+    }
 
-	f, err := os.Create(fileName)//创建文件
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
+    f, err := os.Create(fileName)//创建文件
+    if err != nil {
+        panic(err)
+    }
+    defer f.Close()
 
-	w := csv.NewWriter(f)//创建一个新的写入文件流
+    w := csv.NewWriter(f)//创建一个新的写入文件流
 
-	//检查是否有已经存在，如果未存在则插入
-	for item:= fundDataList.Back(); item != nil; item= item.Prev() {
-		isExist := false
-		
-		data1 := item.Value.(JiJinData)
+    //检查是否有已经存在，如果未存在则插入
+    for item:= fundDataList.Back(); item != nil; item= item.Prev() {
+        isExist := false
+        
+        data1 := item.Value.(JiJinData)
 
-		for i := 0; i < len(oldData);i++{
-			
-			if oldData[i][0] == data1.Fbrq {
-				isExist = true
-				break
-			}
-		}
+        for i := 0; i < len(oldData);i++{
+            
+            if oldData[i][0] == data1.Fbrq {
+                isExist = true
+                break
+            }
+        }
 
-		if false == isExist{
-			data2 := []string{data1.Fbrq, data1.Jjjz, data1.Ljjz}
-			oldData = append(oldData, data2)
-		}
-	}
+        if false == isExist{
+            data2 := []string{data1.Fbrq, data1.Jjjz, data1.Ljjz}
+            oldData = append(oldData, data2)
+        }
+    }
 
-	sort.Sort(FundDataSlice(oldData)) 
+    sort.Sort(FundDataSlice(oldData)) 
 
-	preLjjz := 0.0
-	ljjz0 := 0.0
-	jjjz0 := 0.0
+    preLjjz := 0.0
+    ljjz0 := 0.0
+    jjjz0 := 0.0
     var calcDataArray [][]float64
 
-	for i := 0; i < len(oldData);i++{
+    for i := 0; i < len(oldData);i++{
 
-		jjjz, _ := strconv.ParseFloat(oldData[i][1],64)
-		ljjz, _ := strconv.ParseFloat(oldData[i][2],64)
+        jjjz, _ := strconv.ParseFloat(oldData[i][1],64)
+        ljjz, _ := strconv.ParseFloat(oldData[i][2],64)
 
-		var rateStr string
-		var rate float64
-		if (0 == i) {
-			rateStr = "0.0000"
-			ljjz0 = ljjz
-			jjjz0 = jjjz
-			rate = 0.0
-		} else {
-			rate = (ljjz - preLjjz) / jjjz * 100.0
-			rateStr = fmt.Sprintf("%.4f", rate)
-		}
+        var rateStr string
+        var rate float64
+        if (0 == i) {
+            rateStr = "0.0000"
+            ljjz0 = ljjz
+            jjjz0 = jjjz
+            rate = 0.0
+        } else {
+            rate = (ljjz - preLjjz) / jjjz * 100.0
+            rateStr = fmt.Sprintf("%.4f", rate)
+        }
 
-		rateHistory := (ljjz - ljjz0) / jjjz0 * 100.0
-		rateHistoryStr := fmt.Sprintf("%.4f", rateHistory)
+        rateHistory := (ljjz - ljjz0) / jjjz0 * 100.0
+        rateHistoryStr := fmt.Sprintf("%.4f", rateHistory)
 
-		ratePerYearHistoryAverage := rateHistory / (float64(i+1) / 242.0)
-		ratePerYearHistoryAverageStr := fmt.Sprintf("%.4f", ratePerYearHistoryAverage)
+        ratePerYearHistoryAverage := rateHistory / (float64(i+1) / 242.0)
+        ratePerYearHistoryAverageStr := fmt.Sprintf("%.4f", ratePerYearHistoryAverage)
 
-		calcDataArray = append(calcDataArray, []float64{jjjz, ljjz, rate, rateHistory, ratePerYearHistoryAverage})
+        calcDataArray = append(calcDataArray, []float64{jjjz, ljjz, rate, rateHistory, ratePerYearHistoryAverage})
 
-		var rateJitter float64
-		if  i < 10 {
-			rateJitter = 0.0
-		} else {
-			for j := 0; j < 10; j++ {
-				tmp := calcDataArray[i - j] [2] - calcDataArray[i - j - 1] [2]
-				if tmp < 0.0 {
-					rateJitter -= tmp
-				} else {
-					rateJitter += tmp
-				}
-			}
-		}
-		rateJitter /= 10.0
-		rateJitterStr := fmt.Sprintf("%.4f", rateJitter)
+        var rateJitter float64
+        if  i < 10 {
+            rateJitter = 0.0
+        } else {
+            for j := 0; j < 10; j++ {
+                tmp := calcDataArray[i - j] [2] - calcDataArray[i - j - 1] [2]
+                if tmp < 0.0 {
+                    rateJitter -= tmp
+                } else {
+                    rateJitter += tmp
+                }
+            }
+        }
+        rateJitter /= 10.0
+        rateJitterStr := fmt.Sprintf("%.4f", rateJitter)
 
-		/* 写入的内容：日期，基金净值，累计净值，增长率，历史增长率，历史年化收益率，增长率抖动（１０个交易日平均） */
-		writeData := []string{oldData[i][0], oldData[i][1], oldData[i][2], rateStr, rateHistoryStr, ratePerYearHistoryAverageStr, rateJitterStr}
+        /* 写入的内容：日期，基金净值，累计净值，增长率，历史增长率，历史年化收益率，增长率抖动（１０个交易日平均） */
+        writeData := []string{oldData[i][0], oldData[i][1], oldData[i][2], rateStr, rateHistoryStr, ratePerYearHistoryAverageStr, rateJitterStr}
 
-		data := [][]string{writeData}
+        data := [][]string{writeData}
 
-		w.WriteAll(data)//写入数据
+        w.WriteAll(data)//写入数据
 
-		preLjjz = ljjz
-	}
+        preLjjz = ljjz
+    }
 
-	log.Println("读取数据条目数：", fundDataList.Len())
-	log.Println("写入数据条目数：",len(oldData))
+    log.Println("读取数据条目数：", fundDataList.Len())
+    log.Println("写入数据条目数：",len(oldData))
 
-	w.Flush()
+    w.Flush()
 }
 
 
 
 func WriteFundDataToCsv(fileName string, fundDataList *list.List) {
-	var oldData [][]string
+    var oldData [][]string
 
-	//读取老数据
-	readContent,err := ioutil.ReadFile(fileName)
-	if err == nil {
-		csvReadFp := csv.NewReader(strings.NewReader(string(readContent)))
-		oldData,_ = csvReadFp.ReadAll()
-		log.Println("读取到老数据条目数：",len(oldData))
-	}
+    //读取老数据
+    readContent,err := ioutil.ReadFile(fileName)
+    if err == nil {
+        csvReadFp := csv.NewReader(strings.NewReader(string(readContent)))
+        oldData,_ = csvReadFp.ReadAll()
+        log.Println("读取到老数据条目数：",len(oldData))
+    }
 
-	f, err := os.Create(fileName)//创建文件
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
+    f, err := os.Create(fileName)//创建文件
+    if err != nil {
+        panic(err)
+    }
+    defer f.Close()
 
-	w := csv.NewWriter(f)//创建一个新的写入文件流
+    w := csv.NewWriter(f)//创建一个新的写入文件流
 
-	//检查是否有已经存在，如果未存在则插入
-	for item:= fundDataList.Back(); item != nil; item= item.Prev() {
-		isExist := false
-		
-		data1 := item.Value.(JiJinData)
+    //检查是否有已经存在，如果未存在则插入
+    for item:= fundDataList.Back(); item != nil; item= item.Prev() {
+        isExist := false
 
-    //找重复
-		for i := 0; i < len(oldData);i++{
-			if oldData[i][0] == data1.Fbrq {
-				isExist = true
-				break
-			}
-		}
+        data1 := item.Value.(JiJinData)
 
-		if false == isExist{
-			data2 := []string{data1.Fbrq, data1.Jjjz, data1.Ljjz}
-			oldData = append(oldData, data2)
-		}
-	}
+        //找重复
+        for i := 0; i < len(oldData); i++{
+            if oldData[i][0] == data1.Fbrq {
+                isExist = true
+                break
+            }
+        }
 
-	sort.Sort(FundDataSlice(oldData)) 
+        if false == isExist{
+            data2 := []string{data1.Fbrq, data1.Jjjz, data1.Ljjz}
+            oldData = append(oldData, data2)
+        }
+    }
 
-	for i := 0; i < len(oldData);i++{
-		/* 写入的内容：日期，基金净值，累计净值*/
-		writeData := []string{oldData[i][0], oldData[i][1], oldData[i][2]}
+    sort.Sort(FundDataSlice(oldData)) 
 
-		data := [][]string{writeData}
+    for i := 0; i < len(oldData);i++{
+        /* 写入的内容：日期，基金净值，累计净值*/
+        writeData := []string{oldData[i][0], oldData[i][1], oldData[i][2]}
 
-		w.WriteAll(data)//写入数据
-	}
+        data := [][]string{writeData}
 
-	log.Println("读取数据条目数：", fundDataList.Len())
-	log.Println("写入数据条目数：",len(oldData))
+        w.WriteAll(data)//写入数据
+    }
 
-	w.Flush()
+    log.Println("读取数据条目数：", fundDataList.Len())
+    log.Println("写入数据条目数：",len(oldData))
+
+    w.Flush()
 }
 
 
@@ -305,57 +305,57 @@ var pageCount = flag.Int("p", 1,  "读取的页数")
 var isReadAllPage = flag.Bool("a", false,  "读取所有的页数")
 var saveDir = flag.String("d", "./",  "csv文件输出目录")
 
+
 func main() {
+    flag.Parse()
 
-	flag.Parse()
+    log.Println("基金编号：" + *fundCode)
+    log.Println("读取所有页：" + strconv.FormatBool(*isReadAllPage))
 
-	log.Println("基金编号：" + *fundCode)
-	log.Println("读取所有页：" + strconv.FormatBool(*isReadAllPage))
-
-  //如果没有指定基金编码，则直接提示退出
-  if *fundCode == "" {
-    flag.PrintDefaults()
-    return
-  }
-
-  //读取所有页，999999应该能覆盖所有页了
-	if *isReadAllPage != false {
-		*pageCount = 999999
-	}
-
-	log.Println("读取页数：" + strconv.Itoa(*pageCount))
-
-  //读取到的数据
-	data := list.New()
-  
-  //失败的页列表
-  failPage := list.New()
-
-	for i := 1; i <= *pageCount; i++ {
-		ret := GetFundDataFromSina(*fundCode, i, data)
-		if  ret < 0 {
-      //增加失败处理，等待尝试
-      failPage.PushBack(i)
-		} else if ret == 0 {  //获取不到数据时，表示已经没有了，退出
-      break
-    } else {
-      //nothing
+    //如果没有指定基金编码，则直接提示退出
+    if *fundCode == "" {
+        flag.PrintDefaults()
+        return
     }
-	}
 
-  //失败处理
-  if failPage.Len() > 0 {
-    GetFailPageAgain(failPage, *fundCode, data)
-  }
+    //读取所有页，999999应该能覆盖所有页了
+    if *isReadAllPage != false {
+        *pageCount = 999999
+    }
 
-	if data.Len() == 0 {
-		log.Println("没有获取到数据")
-		return
-	}
+    log.Println("读取页数：" + strconv.Itoa(*pageCount))
 
-	if (*saveDir)[len(*saveDir) - 1] != '/'{
-		*saveDir = *saveDir + "/"
-	}
+    //读取到的数据
+    data := list.New()
+  
+    //失败的页列表
+    failPage := list.New()
 
-	WriteFundDataToCsv(*saveDir+*fundCode+".csv", data)
+    for i := 1; i <= *pageCount; i++ {
+        ret := GetFundDataFromSina(*fundCode, i, data)
+        if  ret < 0 {
+            //增加失败处理，等待尝试
+            failPage.PushBack(i)
+        } else if ret == 0 {  //获取不到数据时，表示已经没有了，退出
+            break
+        } else {
+            //nothing
+        }
+    }
+
+    //失败处理
+    if failPage.Len() > 0 {
+        GetFailPageAgain(failPage, *fundCode, data)
+    }
+
+    if data.Len() == 0 {
+        log.Println("没有获取到数据")
+        return
+    }
+
+    if (*saveDir)[len(*saveDir) - 1] != '/'{
+        *saveDir = *saveDir + "/"
+    }
+
+    WriteFundDataToCsv(*saveDir+*fundCode+".csv", data)
 }
