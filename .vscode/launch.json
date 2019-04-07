@@ -11,7 +11,7 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "env": {},
-            "args": ["-c", "519712", "-d", "../test/csv", "-a"]
+            "args": ["-s", "../test/csv/funds.csv", "-d", "../test/csv", "-a"]
         }
     ]
 }

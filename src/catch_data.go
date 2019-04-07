@@ -249,7 +249,7 @@ func WriteFundDataToCsv(fileName string, fundDataList *list.List) {
     if err == nil {
         csvReadFp := csv.NewReader(strings.NewReader(string(readContent)))
         oldData,_ = csvReadFp.ReadAll()
-        log.Println("读取到老数据条目数：",len(oldData))
+        log.Println(fileName, "读取到老数据条目数：",len(oldData))
     }
 
     f, err := os.Create(fileName)//创建文件
@@ -291,39 +291,20 @@ func WriteFundDataToCsv(fileName string, fundDataList *list.List) {
         w.WriteAll(data)//写入数据
     }
 
-    log.Println("读取数据条目数：", fundDataList.Len())
-    log.Println("写入数据条目数：",len(oldData))
+	log.Println(fileName, "读取数据条目数：", fundDataList.Len())
+    log.Println(fileName, "写入数据条目数：",len(oldData))
 
     w.Flush()
 }
 
+func ReadOneFundData(fundCode string, pageCount int, saveDir string, threadFlag *int) {
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	log.Println("基金编码：", fundCode, "更新基金数据开始")
 
-var fundCode = flag.String("c", "", "基金编码")
-var pageCount = flag.Int("p", 1,  "读取的页数")
-var isReadAllPage = flag.Bool("a", false,  "读取所有的页数")
-var saveDir = flag.String("d", "./",  "csv文件输出目录")
-
-
-func main() {
-    flag.Parse()
-
-    log.Println("基金编号：" + *fundCode)
-    log.Println("读取所有页：" + strconv.FormatBool(*isReadAllPage))
-
-    //如果没有指定基金编码，则直接提示退出
-    if *fundCode == "" {
-        flag.PrintDefaults()
-        return
-    }
-
-    //读取所有页，999999应该能覆盖所有页了
-    if *isReadAllPage != false {
-        *pageCount = 999999
-    }
-
-    log.Println("读取页数：" + strconv.Itoa(*pageCount))
+	defer func() {
+		*threadFlag = 0
+		log.Println("基金编码：", fundCode, "更新基金数据结束")
+	}()
 
     //读取到的数据
     data := list.New()
@@ -331,8 +312,8 @@ func main() {
     //失败的页列表
     failPage := list.New()
 
-    for i := 1; i <= *pageCount; i++ {
-        ret := GetFundDataFromSina(*fundCode, i, data)
+    for i := 1; i <= pageCount; i++ {
+        ret := GetFundDataFromSina(fundCode, i, data)
         if  ret < 0 {
             //增加失败处理，等待尝试
             failPage.PushBack(i)
@@ -345,17 +326,97 @@ func main() {
 
     //失败处理
     if failPage.Len() > 0 {
-        GetFailPageAgain(failPage, *fundCode, data)
+        GetFailPageAgain(failPage, fundCode, data)
     }
 
     if data.Len() == 0 {
-        log.Println("没有获取到数据")
+		log.Println("没有获取到数据")
         return
     }
 
-    if (*saveDir)[len(*saveDir) - 1] != '/'{
-        *saveDir = *saveDir + "/"
+    if (saveDir)[len(saveDir) - 1] != '/' {
+        saveDir = saveDir + "/"
     }
 
-    WriteFundDataToCsv(*saveDir+*fundCode+".csv", data)
+	WriteFundDataToCsv(saveDir+fundCode+".csv", data)
+}
+
+func ReadAllFundData(sourceFileName string, pageCount int, saveDir string) {
+    var fundList [][]string
+
+    //读取老数据
+    readContent,err := ioutil.ReadFile(sourceFileName)
+    if err == nil {
+        csvReadFp := csv.NewReader(strings.NewReader(string(readContent)))
+        fundList,_ = csvReadFp.ReadAll()
+        log.Println("读取到基金数据条目数：",len(fundList))
+    }
+	
+	readThreads := []int{0,0,0,0,0,0,0,0,0,0}
+	fundIndex := 1
+
+	for ;; {
+		readEnd := 0
+		for i := 0; i < len(readThreads); i++ {
+			if readThreads[i] == 0 {
+
+				if fundIndex >= len(fundList) {
+					//log.Println("基金列表读取完毕")
+					break
+				}
+
+				log.Println(fundList[fundIndex][0], fundList[fundIndex][1], fundList[fundIndex][2])
+
+				readThreads[i] = 1
+				go ReadOneFundData(fundList[fundIndex][0], pageCount, saveDir, &readThreads[i])
+				fundIndex++
+
+				readEnd = 1
+			} else {
+				readEnd = 1
+			}
+		}
+
+		if readEnd == 0 {
+			log.Println("基金数据更新完毕")
+			break
+		}
+
+		time.Sleep(1)
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var fundCode = flag.String("c", "", "基金编码")
+var pageCount = flag.Int("p", 1,  "读取的页数")
+var isReadAllPage = flag.Bool("a", false,  "读取所有的页数")
+var saveDir = flag.String("d", "./",  "csv文件输出目录")
+var fundsListPath = flag.String("s", "",  "基金列表文件路径")
+
+func main() {
+    flag.Parse()
+
+    log.Println("基金编号：" + *fundCode)
+    log.Println("读取所有页：" + strconv.FormatBool(*isReadAllPage))
+
+    //如果没有指定基金编码，则直接提示退出
+    if *fundCode == "" && *fundsListPath == "" {
+        flag.PrintDefaults()
+        return
+    }
+
+    //读取所有页，999999应该能覆盖所有页了
+    if *isReadAllPage != false {
+        *pageCount = 999999
+    }
+
+    log.Println("读取页数：" + strconv.Itoa(*pageCount))
+
+	if *fundCode != "" {
+		threadFlag := 0
+		ReadOneFundData(*fundCode, *pageCount, *saveDir, &threadFlag) 
+	} else {
+		ReadAllFundData(*fundsListPath, *pageCount, *saveDir)
+	}
 }
