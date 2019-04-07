@@ -392,7 +392,7 @@ var fundCode = flag.String("c", "", "基金编码")
 var pageCount = flag.Int("p", 1,  "读取的页数")
 var isReadAllPage = flag.Bool("a", false,  "读取所有的页数")
 var saveDir = flag.String("d", "./",  "csv文件输出目录")
-var fundsListPath = flag.String("s", "",  "基金列表文件路径")
+var fundsListPath = flag.String("s", "",  "基金列表文件路径，采用此参数可以进行批量更新")
 
 func main() {
     flag.Parse()
