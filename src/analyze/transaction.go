@@ -2,7 +2,7 @@ package analyze
 
 import (
 	"../util"
-	"fmt"
+	//"fmt"
 )
 
 type FundTransGrowth struct {
@@ -72,7 +72,7 @@ func GetMyGrowth(code string) ([]FundTransGrowth, string) {
 		lastDayAmount = growth.CurAmount
 		lastDayUnits = growth.CurUnits
 
-		fmt.Println(growth)
+		//fmt.Println(growth)
 
 		fundTransGrowth = append(fundTransGrowth, growth)
 	}

@@ -1,7 +1,7 @@
 package analyze
 
 import (
-	"fmt"
+//	"fmt"
 	"io/ioutil"
 	"strings"
 	"encoding/csv"
@@ -156,7 +156,7 @@ func AnalyzeGain(analyzeData FundAnalyzeData, path string) {
 		prevCount = transData.count
 		preIncome = transData.income
 
-		fmt.Println(transData)
+		//fmt.Println(transData)
 	}
 }
 
