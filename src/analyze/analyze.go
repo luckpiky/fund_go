@@ -8,6 +8,8 @@ import (
 	"log"
 	"strconv"
 	"container/list"
+	"time"
+	"../util"
 )
 
 type FundTransData struct {
@@ -51,9 +53,13 @@ func ReadFundTransactionData(path string, analyzeData FundAnalyzeData) {
 	for i := 1; i < len(transData); i++ {
 		var data FundTransData
 
+		log.Println(transData[i][0], transData[i][1], transData[i][2], analyzeData.FundCode)
+
 		if (transData[i][0] != analyzeData.FundCode) {
 			continue
 		}
+
+		log.Println(transData[i][0])
 
 		data.code = transData[i][0]
 		data.time = transData[i][1]
@@ -205,4 +211,168 @@ func Init1() {
 	allData := list.New()
 
 	GetAllFundIncomeData("../test/csv", allData)
+}
+
+/* 获取指定时间的基金份额 */
+func GetFundUnitsByTime() {
+
+}
+
+type FundIncomeData struct {
+	Code string
+	Date int64
+	Income float64 // 收益
+	Units float64  //基金份额
+	Cost float64   // 成本
+	AccumulatedIncome float64  // 累计收益
+}
+
+/* 获取指定基金的历史收益 */
+func GetInComeData(code string) (income []FundIncomeData) {
+	transData := GetTransData2(code)
+	priceData := GetFundPriceData(code)
+	var incomeData []FundIncomeData
+
+	units := 0.0
+	cost := 0.0
+	accumulatedIncome := 0.0
+	
+	j := 0
+	for i := 0; i < len(priceData); i++ {
+		first := false
+		pay := 0.0
+		if (priceData[i].Date == transData[j].Date) {
+			if units == 0 {
+				first = true
+			}
+			
+			if (transData[j].Units != 0) {  // 分红，且份额不减少，暂时先这么算吧
+				pay = transData[j].Amount - priceData[i].Jjjz * transData[j].Units
+				pay = util.GetFloatFormat(pay, 2)
+			}
+
+			cost += transData[j].Amount
+
+			dateStr := time.Unix(priceData[i].Date, 0).Format("2006-01-02 15:04:05") 
+			log.Println(dateStr, "购买基金份额：", transData[j].Units, "交易金额：", transData[j].Amount, "交易费用：", pay)
+		}
+
+		if (units != 0 || first) {
+			var income FundIncomeData
+			income.Cost = cost
+			income.Units = units
+			income.Code = code
+			income.Date = priceData[i].Date
+			if (first) {
+				income.Income = 0 - pay
+			} else {
+				income.Income = units * (priceData[i].Ljjz - priceData[i-1].Ljjz) - pay
+			}
+
+			income.Income = util.GetFloatFormat(income.Income, 2)
+			
+			accumulatedIncome += income.Income
+			income.AccumulatedIncome += accumulatedIncome
+	
+			incomeData = append(incomeData, income)
+	
+			dateStr := time.Unix(priceData[i].Date, 0).Format("2006-01-02 15:04:05") 
+			log.Println(dateStr, "基金收益：", income.Income, " 基金份额：", units)
+		}
+
+		// 交易当天不能计算收益
+		if (priceData[i].Date == transData[j].Date) {
+			units += transData[j].Units
+			units = util.GetFloatFormat(units, 2)
+			if j < len(transData) - 1 {
+				j++
+			}
+		}
+	}
+
+	log.Println("基金收益条目数：", len(incomeData))
+	return incomeData
+}
+
+
+/* 获取指定时间范围的基金收益 */
+func GetFundIncomeByTimeRange(code string, incomeData []FundIncomeData, time1 int64, time2 int64) (float64) {
+	begin := false
+	income := 0.0
+
+	dateStr1 := time.Unix(time1, 0).Format("2006-01-02 15:04:05") 
+	dateStr2 := time.Unix(time2, 0).Format("2006-01-02 15:04:05") 
+	log.Println(dateStr1, "to", dateStr2, len(incomeData))
+
+	for i := 0; i < len(incomeData); i++ {
+		if (time1 <= incomeData[i].Date && time2 >= incomeData[i].Date) {
+			begin = true
+		}
+
+		if begin {
+			income += incomeData[i].Income
+		}
+
+		if (time2 < incomeData[i].Date) {
+			break
+		}
+	}
+
+	return util.GetFloatFormat(income, 2)
+}
+
+/* 获取最近一年中每月的基金收益 */
+func GetFundIncomeByMonthInRecentYear(code string) (income []FundIncomeData)  {
+	incomeData := GetInComeData(code)
+	var incomeData2 []FundIncomeData
+
+	year:=time.Now().Year()
+	month:=time.Now().Month()
+
+	for i := 0; i < 12; i++ {
+		firstDay := strconv.Itoa(year) + "-" + strconv.Itoa(int(month)) + "-1 00:00:00"
+		log.Println(firstDay)
+		firstDayInt := util.TimeStr2Int64_2(firstDay)
+		firstDayTime := time.Unix(firstDayInt, 0)
+		lastDayTime := firstDayTime.AddDate(0, 1, -1)
+		lastDayInt := lastDayTime.Unix()
+
+		var income FundIncomeData
+		income.Income = GetFundIncomeByTimeRange(code, incomeData, firstDayInt, lastDayInt)
+		income.Date = firstDayInt
+		income.Code = code
+		incomeData2 = append(incomeData2, income)
+
+		log.Println(firstDay, "收益：", income)
+
+		if (month == 1) {
+			month = 12
+			year = year - 1
+		} else {
+			month = month - 1
+		}
+	}
+
+	/* 前面是倒序的，需要正过来 */
+	var incomeData3 []FundIncomeData
+	for i := 0; i < len(incomeData2); i++ {
+		incomeData3 = append(incomeData3, incomeData2[len(incomeData2) - i - 1])
+	}
+
+	return incomeData3
+}
+
+func GetFundAccumulatedIncome(code string) (float64, float64, float64) {
+	incomeData := GetInComeData(code)
+	if (len(incomeData) > 0) {
+		accumulatedIncome := incomeData[len(incomeData)-1].AccumulatedIncome
+		cost := incomeData[len(incomeData)-1].Cost
+		accumulatedIncomePercent := accumulatedIncome * 100 / incomeData[len(incomeData)-1].Cost
+
+		return util.GetFloatFormat(accumulatedIncome, 2),
+			   util.GetFloatFormat(accumulatedIncomePercent, 2),
+			   util.GetFloatFormat(cost, 2)
+	}
+	
+	return 0.0, 0.0, 0.0
 }

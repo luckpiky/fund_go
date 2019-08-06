@@ -39,6 +39,10 @@ func SetDataPath(path string) {
 	dataPath = path
 }
 
+func GetDataPath() string {
+	return dataPath
+}
+
 func GetAllFundsList() {
 	var fundsData [][] string
 
@@ -192,7 +196,7 @@ func GetTransData(code string) ([]FundTrans) {
 
 	for i := 1; i < len(transData); i++ {
 		if code != "" && code != transData[i][0] {
-			continue 
+			continue
 		}
 
 		var trans FundTrans
@@ -223,4 +227,74 @@ func init() {
 	for item := range MyFundsList {
 		fmt.Println(item)
 	}
+}
+
+type FundTransData2 struct {
+	Date int64
+	Code string
+	Units float64 //交易份额
+	Amount float64  //交易金额
+}
+
+type FundPriceData2 struct {
+	Date int64
+	Jjjz float64
+	Ljjz float64
+}
+
+func GetFundPriceData(code string) (price []FundPriceData2) {
+	var fundPrice [][] string
+	var fundPriceData []FundPriceData2
+
+	fileName := dataPath + "/" + code + ".csv"
+
+	readContent,err := ioutil.ReadFile(fileName)
+    if err == nil {
+        csvReadFp := csv.NewReader(strings.NewReader(string(readContent)))
+        fundPrice,_ = csvReadFp.ReadAll()
+        log.Println(fileName, "读取到基金价格数据条目数：",len(fundPrice))
+    } else {
+		log.Println(err)
+	}
+
+	for i := 0; i < len(fundPrice); i++ {
+		var price FundPriceData2
+		price.Date = util.TimeStr2Int64(fundPrice[i][0])
+		price.Jjjz,_ = strconv.ParseFloat(fundPrice[i][1], 64)
+		price.Ljjz,_ = strconv.ParseFloat(fundPrice[i][2], 64)
+		fundPriceData = append(fundPriceData, price)
+	}
+
+	return fundPriceData
+}
+
+func GetTransData2(code string) ([]FundTransData2) {
+	var transList []FundTransData2
+	var transData [][] string
+
+	fileName := dataPath + "/fund_transaction.csv"
+
+	readContent,err := ioutil.ReadFile(fileName)
+    if err == nil {
+        csvReadFp := csv.NewReader(strings.NewReader(string(readContent)))
+        transData,_ = csvReadFp.ReadAll()
+        log.Println(fileName, "读取到基金交易数据条目数：",len(transData))
+    } else {
+		log.Println(err)
+	}
+
+	for i := 1; i < len(transData); i++ {
+		if code != "" && code != transData[i][0] {
+			continue
+		}
+
+		var trans FundTransData2
+		trans.Date = util.TimeStr2Int64(transData[i][1])
+		trans.Code = transData[i][0]
+		trans.Units,_ = strconv.ParseFloat(transData[i][2], 64)
+		trans.Amount,_ = strconv.ParseFloat(transData[i][3], 64)
+		transList = append(transList, trans)
+	}
+
+	return transList
 }

@@ -3,6 +3,7 @@ package util
 import (
 	"strings"
 	"strconv"
+	"time"
 )
 
 
@@ -64,4 +65,20 @@ func GetNextMonthFirstDay(curDate string) (firstDate string) {
 func GetNextMonthLastDay(curDate string) (firstDate string) {
 	nextMonthDay := GetNextMonthFirstDay(curDate)
 	return GetCurMonthLastDay(nextMonthDay)
+}
+
+func TimeStr2Int64(timeStr string) (int64) {
+    stamp, _ := time.ParseInLocation("2006-01-02 03:04:05", timeStr, time.Local)
+	return stamp.Unix()
+}
+
+func TimeStr2Int64_2(timeStr string) (int64) {
+    stamp, _ := time.ParseInLocation("2006-1-2 03:04:05", timeStr, time.Local)
+	return stamp.Unix()
+}
+
+func Int64ToMonthStr(in int64) (out string) {
+	tm := time.Unix(in, 0)
+	out = tm.Format("2006-01")
+	return out
 }

@@ -6,6 +6,7 @@ import (
 	//f "./analyze"
 	catcher "./catch"
 	_ "./beego/router"
+	"./util"
 )
 
 var catch = flag.Bool("catch", false, "数据抓取")
@@ -19,6 +20,7 @@ func main() {
 		catcher.CatchDataMain()
 	} else if *runserver == true {
 		beego.SetStaticPath("js","views/js")
+		beego.AddFuncMap("convertmonth", util.Int64ToMonthStr)
 		beego.Run()
 	}
 }

@@ -1,11 +1,10 @@
 package controller
 
 import (
-	//"fmt"
-	//"container/list"
     "github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"../../analyze"
+	//"../../util"
 )
 
 
@@ -26,6 +25,7 @@ func (p *GetFundInfo) Get() {
 	basicInfo := analyze.GetFundBasicInfoByCode(code)
 	logs.Debug("get fund basic info:", basicInfo)
 
+	p.Data["code"] = code
 	p.Data["name"] = basicInfo[0]
 	p.Data["type"] = basicInfo[1]
 
@@ -35,6 +35,12 @@ func (p *GetFundInfo) Get() {
 	p.Data["growth2"] = analyze.GetGrowthRateFromBeginByCode(code, startDate) 
 	
 	p.Data["transGrowth"] = growth
+
+	// 每月的收益情况
+	p.Data["monthIncome"] = analyze.GetFundIncomeByMonthInRecentYear(code)
+
+	// 累计收益
+	p.Data["accumulatedIncome"],p.Data["accumulatedIncomePercent"],p.Data["cost"] = analyze.GetFundAccumulatedIncome(code)
 
 	p.TplName = "fundinfo.html"
 }

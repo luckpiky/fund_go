@@ -5,6 +5,7 @@ import (
 	//"fmt"
 )
 
+
 type FundTransGrowth struct {
 	Date string
 	Code string

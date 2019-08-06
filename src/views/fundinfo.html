@@ -2,21 +2,49 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>{{.name}}</title>
     <script src="js/echarts.js"></script>
 </head>
 <body>
-hello beego<br>
-
-基金编码：{{.code}}<br>
-基金名称：{{.name}}<br>
-基金类型：{{.type}}<br>
 
 
-    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 600px;height:400px;"></div>
-    <div id="main2" style="width: 600px;height:400px;"></div>
+<table>
+    <tr>
+        <td><b>基金编码：</b></td>
+        <td>{{.code}}</td>
+    </tr>
+    <tr>
+        <td><b>基金名称：</b></td>
+        <td>{{.name}}</td>
+    </tr>
+    <tr>
+        <td><b>基金类型：</b></td>
+        <td>{{.type}}</td>
+    </tr>
+    <tr>
+        <td><b>累计收益：</b></td>
+        <td>{{.accumulatedIncome}} | {{.accumulatedIncomePercent}}%</td>
+    </tr>
+    <tr>
+        <td><b>成本：</b></td>
+        <td>{{.cost}}</td>
+    </tr>
+</table>
 
+<br>
+
+<table>
+    <tr>
+        <td><div id="main" style="width: 600px;height:400px;"></div></td>
+        <td><div id="main2" style="width: 600px;height:400px;"></div></td>
+    </tr>
+    <tr>
+        <td><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
+        <td></td>
+    </tr>
+</table>
+</body>
+</html>
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'));
@@ -24,7 +52,7 @@ hello beego<br>
         // 指定图表的配置项和数据
         var option = {
             title: {
-                text: '折线图堆叠'
+                text: '历史增长数据'
             },
             tooltip: {
                 trigger: 'axis'
@@ -78,7 +106,7 @@ hello beego<br>
         // 指定图表的配置项和数据
         var option = {
             title: {
-                text: '折线图堆叠'
+                text: '收益率'
             },
             tooltip: {
                 trigger: 'axis'
@@ -125,12 +153,53 @@ hello beego<br>
         myChart.setOption(option);
     </script>
 
-<table>
-        <tr><td>时间</td><td>交易数量</td><td>当前份额</td><td>收益率</td><td>收益</td><td>均价</td></tr>
-        {{range .transGrowth2}}
-        <tr><td>{{.Date}}</td><td>{{.TransNum}}</td><td>{{.TotalNum}}</td><td>{{.Rate}}</td><td>{{.Income}}</td><td>{{.AveragePrice}}</td></tr>
-        {{end}}
-    </table>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('monthIncome'));
 
-</body>
-</html>
+    // 指定图表的配置项和数据
+    option = {
+        title : {
+            text: '月收益',
+        },
+        tooltip : {
+            trigger: 'axis'
+        },
+        legend: {
+            data:['收益','月份']
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                mark : {show: true},
+                dataView : {show: true, readOnly: false},
+                magicType : {show: true, type: ['line', 'bar']},
+                restore : {show: true},
+                saveAsImage : {show: true}
+            }
+        },
+        calculable : true,
+        xAxis : [
+            {
+                type : 'category',
+                data : [{{range .monthIncome}}'{{.Date | convertmonth}}',{{end}}]
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'收益',
+                type:'bar',
+                data:[{{range .monthIncome}}'{{.Income}}',{{end}}],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+

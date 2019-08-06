@@ -2,18 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>我的基金列表</title>
+    <script src="js/echarts.js"></script>
 </head>
 <body>
-hello beego<br>
 
-<a href="/income">income</a>
+<table border="0" cellspacing="10" cellpadding="0">
+    <tr>
+        <td><b>基金数量：</b></td>
+        <td>{{.num}}</td>
+    </tr>
+    <tr>
+        <td><b>累计收益：</b></td>
+        <td>{{.accumulatedIncome}}</td>
+    </tr>
+    <tr>
+        <td><b>收益率：</b></td>
+        <td>{{.accumulatedIncomePercent}}%</td>
+    </tr>
+    <tr>
+        <td><b>成本：</b></td>
+        <td>{{.cost}}</td>
+    </tr>
+</table>
+
+<br>
 
 <table>
-    <tr><td>基金编码</td><td>基金名称</td><td>操作</td></tr>
-    {{range $key, $val := .funds}}
-    <tr><td>{{$key}}</td><td>{{$val}}</td><td><a href="/fundinfo?code={{$key}}">查看</a></td></tr>
-    {{end}}
+    <tr>
+        <td valign="top">
+            <table border="0" cellspacing="10" cellpadding="0">
+                <tr>
+                    <td><b>基金编码</b></td>
+                    <td><b>基金名称</b></td>
+                    <td><b>基金类型</b></td>
+                    <td><b>累计收益</b></td>
+                    <td><b>收益率</b></td>
+                    <td><b>成本</b></td>
+                    <td><b>操作</b></td>
+                </tr>
+                
+                {{range .funds}}
+                <tr>
+                    <td>{{.Code}}</td>
+                    <td>{{.Name}}</td>
+                    <td>{{.FundType}}</td>
+                    <td>{{.AccumulatedIncome}}</td>
+                    <td>{{.AccumulatedIncomePercent}}%</td>
+                    <td>{{.Cost}}</td>
+                    <td><a href="/fundinfo?code={{.Code}}">查看</a></td>
+                </tr>
+                {{end}}
+            </table>
+        </td>
+        <td valign="top"><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
+    </tr>
 </table>
+
+
 </body>
 </html>
+
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('monthIncome'));
+
+    // 指定图表的配置项和数据
+    option = {
+        title : {
+            text: '月收益',
+        },
+        tooltip : {
+            trigger: 'axis'
+        },
+        legend: {
+            data:['收益','月份']
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                mark : {show: true},
+                dataView : {show: true, readOnly: false},
+                magicType : {show: true, type: ['line', 'bar']},
+                restore : {show: true},
+                saveAsImage : {show: true}
+            }
+        },
+        calculable : true,
+        xAxis : [
+            {
+                type : 'category',
+                data : [{{range .monthIncome}}'{{.Date | convertmonth}}',{{end}}]
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'收益',
+                type:'bar',
+                data:[{{range .monthIncome}}'{{.Income}}',{{end}}],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
