@@ -10,37 +10,35 @@
 
 <table>
     <tr>
-        <td><b>基金编码：</b></td>
-        <td>{{.code}}</td>
+        <td valign="top">
+            <table>
+                <tr>
+                    <td><b>基金编码：</b></td>
+                    <td>{{.code}}</td>
+                </tr>
+                <tr>
+                    <td><b>基金名称：</b></td>
+                    <td>{{.name}}</td>
+                </tr>
+                <tr>
+                    <td><b>基金类型：</b></td>
+                    <td>{{.type}}</td>
+                </tr>
+                <tr>
+                    <td><b>累计收益：</b></td>
+                    <td>{{.accumulatedIncome}} | {{.accumulatedIncomePercent}}%</td>
+                </tr>
+                <tr>
+                    <td><b>成本：</b></td>
+                    <td>{{.cost}}</td>
+                </tr>
+            </table>
+        </td>
+        <td><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
     </tr>
-    <tr>
-        <td><b>基金名称：</b></td>
-        <td>{{.name}}</td>
-    </tr>
-    <tr>
-        <td><b>基金类型：</b></td>
-        <td>{{.type}}</td>
-    </tr>
-    <tr>
-        <td><b>累计收益：</b></td>
-        <td>{{.accumulatedIncome}} | {{.accumulatedIncomePercent}}%</td>
-    </tr>
-    <tr>
-        <td><b>成本：</b></td>
-        <td>{{.cost}}</td>
-    </tr>
-</table>
-
-<br>
-
-<table>
     <tr>
         <td><div id="main" style="width: 600px;height:400px;"></div></td>
         <td><div id="main2" style="width: 600px;height:400px;"></div></td>
-    </tr>
-    <tr>
-        <td><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
-        <td></td>
     </tr>
 </table>
 </body>

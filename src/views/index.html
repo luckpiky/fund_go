@@ -71,13 +71,13 @@
     // 指定图表的配置项和数据
     option = {
         title : {
-            text: '月收益',
+            text: '',
         },
         tooltip : {
             trigger: 'axis'
         },
         legend: {
-            data:['收益','月份']
+            data:['月收益','月份']
         },
         toolbox: {
             show : true,
@@ -103,7 +103,7 @@
         ],
         series : [
             {
-                name:'收益',
+                name:'月收益',
                 type:'bar',
                 data:[{{range .monthIncome}}'{{.Income}}',{{end}}],
             }
