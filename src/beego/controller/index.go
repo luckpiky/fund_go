@@ -24,6 +24,7 @@ type MyFundInfo struct {
 type MyFundIncome struct {
 	Date int64
 	Income float64
+	Cost float64
 }
 
 type MyFundsInfo []MyFundInfo
@@ -46,6 +47,7 @@ func (p *IndexController) Index() {
 	accumulatedIncome := 0.0
 	accumulatedIncomePercent := 0.0
 	cost := 0.0
+	
 	for code := range analyze.MyFundsList {
 		var fundInfo MyFundInfo
 		fundInfo.Code = code
@@ -61,6 +63,7 @@ func (p *IndexController) Index() {
 		for i:= 0; i < len(monthIncome); i++ {
 			myFundIncom[i].Date = monthIncome[i].Date
 			myFundIncom[i].Income += monthIncome[i].Income
+			myFundIncom[i].Cost += monthIncome[i].Cost
 		}
 	}
 
@@ -70,10 +73,18 @@ func (p *IndexController) Index() {
 
 	sort.Stable(myFundsInfo)
 
+	var myFundIncomePercent [12]MyFundIncome
+	for i := 0; i < len(myFundIncom); i++ {
+		myFundIncomePercent[i].Income = util.GetFloatFormat(myFundIncom[i].Income * 100 / myFundIncom[i].Cost, 2)
+		myFundIncomePercent[i].Date = myFundIncom[i].Date
+		logs.Debug(myFundIncom[i].Date, myFundIncom[i].Income, myFundIncom[i].Cost, myFundIncomePercent[i].Income)
+	}
+
 	p.Data["funds"] = myFundsInfo
 	p.Data["num"] = len(myFundsInfo)
 	p.Data["accumulatedIncome"] = util.GetFloatFormat(accumulatedIncome, 2)
 	p.Data["cost"] = util.GetFloatFormat(cost, 2)
 	p.Data["accumulatedIncomePercent"] = util.GetFloatFormat(accumulatedIncomePercent, 2)
 	p.Data["monthIncome"] = myFundIncom
+	p.Data["monthIncomePercent"] = myFundIncomePercent
 }

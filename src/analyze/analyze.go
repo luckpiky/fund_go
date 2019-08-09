@@ -296,13 +296,14 @@ func GetInComeData(code string) (income []FundIncomeData) {
 
 
 /* 获取指定时间范围的基金收益 */
-func GetFundIncomeByTimeRange(code string, incomeData []FundIncomeData, time1 int64, time2 int64) (float64) {
+func GetFundIncomeByTimeRange(code string, incomeData []FundIncomeData, time1 int64, time2 int64) (float64, float64) {
 	begin := false
 	income := 0.0
+	cost := 0.0
 
-	dateStr1 := time.Unix(time1, 0).Format("2006-01-02 15:04:05") 
-	dateStr2 := time.Unix(time2, 0).Format("2006-01-02 15:04:05") 
-	log.Println(dateStr1, "to", dateStr2, len(incomeData))
+	//dateStr1 := time.Unix(time1, 0).Format("2006-01-02 15:04:05") 
+	//dateStr2 := time.Unix(time2, 0).Format("2006-01-02 15:04:05") 
+	//log.Println(dateStr1, "to", dateStr2, len(incomeData))
 
 	for i := 0; i < len(incomeData); i++ {
 		if (time1 <= incomeData[i].Date && time2 >= incomeData[i].Date) {
@@ -311,6 +312,8 @@ func GetFundIncomeByTimeRange(code string, incomeData []FundIncomeData, time1 in
 
 		if begin {
 			income += incomeData[i].Income
+			cost = incomeData[i].Cost
+			log.Println(incomeData[i].Date, incomeData[i].Income, incomeData[i].Cost)
 		}
 
 		if (time2 < incomeData[i].Date) {
@@ -318,7 +321,7 @@ func GetFundIncomeByTimeRange(code string, incomeData []FundIncomeData, time1 in
 		}
 	}
 
-	return util.GetFloatFormat(income, 2)
+	return util.GetFloatFormat(income, 2), util.GetFloatFormat(cost, 2)
 }
 
 /* 获取最近一年中每月的基金收益 */
@@ -338,12 +341,12 @@ func GetFundIncomeByMonthInRecentYear(code string) (income []FundIncomeData)  {
 		lastDayInt := lastDayTime.Unix()
 
 		var income FundIncomeData
-		income.Income = GetFundIncomeByTimeRange(code, incomeData, firstDayInt, lastDayInt)
+		income.Income, income.Cost = GetFundIncomeByTimeRange(code, incomeData, firstDayInt, lastDayInt)
 		income.Date = firstDayInt
 		income.Code = code
 		incomeData2 = append(incomeData2, income)
 
-		log.Println(firstDay, "收益：", income)
+		//log.Println(firstDay, "收益：", income)
 
 		if (month == 1) {
 			month = 12

@@ -2,7 +2,7 @@ package controller
 
 import (
 	"container/list"
-	"log"
+	//"log"
     "github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"../../analyze"
@@ -20,13 +20,12 @@ type FundIncomeShowData struct {
 func (p *GetFundIncome) Get() {
 	logs.Debug("enter income controller.....")
 
-	income := analyze.GetInComeData("000311")
-	log.Println(income)
+	//income := analyze.GetInComeData("000311")
+	//log.Println(income)
 
-	analyze.GetFundIncomeByMonthInRecentYear("519062")
+	//analyze.GetFundIncomeByMonthInRecentYear("519062")
 
 	allData := list.New()
-
 	analyze.GetAllFundIncomeData(analyze.GetDataPath(), allData)
 
 	data := []FundIncomeShowData{}

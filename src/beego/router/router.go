@@ -13,6 +13,7 @@ func init(){
     //beego默认需要模板文件
     beego.Router("/index",&Index.IndexController{},"*:Index")//"get:"
 	beego.Router("/fundinfo",&Index.GetFundInfo{},"*:Get")//"get:"
+	beego.Router("/update.html",&Index.Update{},"*:Get")//"get:"
 	
 	beego.Router("/income",&Index.GetFundIncome{},"*:Get")//"get:"
 

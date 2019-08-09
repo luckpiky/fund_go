@@ -7,55 +7,85 @@
 </head>
 <body>
 
-<table border="0" cellspacing="10" cellpadding="0">
-    <tr>
-        <td><b>基金数量：</b></td>
-        <td>{{.num}}</td>
-    </tr>
-    <tr>
-        <td><b>累计收益：</b></td>
-        <td>{{.accumulatedIncome}}</td>
-    </tr>
-    <tr>
-        <td><b>收益率：</b></td>
-        <td>{{.accumulatedIncomePercent}}%</td>
-    </tr>
-    <tr>
-        <td><b>成本：</b></td>
-        <td>{{.cost}}</td>
-    </tr>
-</table>
-
-<br>
 
 <table>
     <tr>
-        <td valign="top">
-            <table border="0" cellspacing="10" cellpadding="0">
+        <td>
+            <table border="0" cellspacing="10" cellpadding="0" valign="top">
                 <tr>
-                    <td><b>基金编码</b></td>
-                    <td><b>基金名称</b></td>
-                    <td><b>基金类型</b></td>
-                    <td><b>累计收益</b></td>
-                    <td><b>收益率</b></td>
-                    <td><b>成本</b></td>
-                    <td><b>操作</b></td>
+                    <td valign="top">
+                        <table valign="top">
+                            <tr>
+                                <td valign="top">
+                                    <table border="0" cellspacing="5" cellpadding="0" valign="top">
+                                        <tr>
+                                            <td><b>基金数量：</b></td>
+                                            <td>{{.num}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>累计收益：</b></td>
+                                            <td>{{.accumulatedIncome}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>收益率：</b></td>
+                                            <td>{{.accumulatedIncomePercent}}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>成本：</b></td>
+                                            <td>{{.cost}}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table border="0" align="right"  width="300">
+                                        <tr align="right">
+                                            <td valign="top"><iframe src="update.html" name="框架标识名" frameborder="边框" scrolling="yes"></iframe></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>   
+                        </table>
+                    </td>
                 </tr>
-                
-                {{range .funds}}
                 <tr>
-                    <td>{{.Code}}</td>
-                    <td>{{.Name}}</td>
-                    <td>{{.FundType}}</td>
-                    <td>{{.AccumulatedIncome}}</td>
-                    <td>{{.AccumulatedIncomePercent}}%</td>
-                    <td>{{.Cost}}</td>
-                    <td><a href="/fundinfo?code={{.Code}}">查看</a></td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td><b>基金编码</b></td>
+                                <td><b>基金名称</b></td>
+                                <td><b>基金类型</b></td>
+                                <td><b>累计收益</b></td>
+                                <td><b>收益率</b></td>
+                                <td><b>成本</b></td>
+                                <td><b>操作</b></td>
+                            </tr>
+                            {{range .funds}}
+                            <tr>
+                                <td>{{.Code}}</td>
+                                <td>{{.Name}}</td>
+                                <td>{{.FundType}}</td>
+                                <td>{{.AccumulatedIncome}}</td>
+                                <td>{{.AccumulatedIncomePercent}}%</td>
+                                <td>{{.Cost}}</td>
+                                <td><a href="/fundinfo?code={{.Code}}">查看</a></td>
+                            </tr>
+                            {{end}}
+                        </table>
+                    </td>
+
                 </tr>
-                {{end}}
             </table>
         </td>
-        <td valign="top"><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
+        <td>
+            <table>
+                <tr>
+                    <td valign="top"><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
+                </tr>
+                <tr>
+                    <td valign="top"><div id="monthIncomePercent" style="width: 600px;height:400px;"></div></td>
+                </tr>
+            </table>
+        </td>
     </tr>
 </table>
 
@@ -106,6 +136,56 @@
                 name:'月收益',
                 type:'bar',
                 data:[{{range .monthIncome}}'{{.Income}}',{{end}}],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('monthIncomePercent'));
+
+    // 指定图表的配置项和数据
+    option = {
+        title : {
+            text: '',
+        },
+        tooltip : {
+            trigger: 'axis'
+        },
+        legend: {
+            data:['月收益率','月份']
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                mark : {show: true},
+                dataView : {show: true, readOnly: false},
+                magicType : {show: true, type: ['line', 'bar']},
+                restore : {show: true},
+                saveAsImage : {show: true}
+            }
+        },
+        calculable : true,
+        xAxis : [
+            {
+                type : 'category',
+                data : [{{range .monthIncomePercent}}'{{.Date | convertmonth}}',{{end}}]
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'月收益率',
+                type:'line',
+                data:[{{range .monthIncomePercent}}'{{.Income}}',{{end}}],
             }
         ]
     };
