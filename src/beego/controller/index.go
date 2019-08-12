@@ -27,6 +27,12 @@ type MyFundIncome struct {
 	Cost float64
 }
 
+type FundType struct {
+	Name string
+	Income float64
+	Cost float64
+}
+
 type MyFundsInfo []MyFundInfo
 
 func (s MyFundsInfo) Len() int { return len(s) }
@@ -77,7 +83,43 @@ func (p *IndexController) Index() {
 	for i := 0; i < len(myFundIncom); i++ {
 		myFundIncomePercent[i].Income = util.GetFloatFormat(myFundIncom[i].Income * 100 / myFundIncom[i].Cost, 2)
 		myFundIncomePercent[i].Date = myFundIncom[i].Date
+
+		myFundIncom[i].Income = util.GetFloatFormat(myFundIncom[i].Income, 2)
+
 		logs.Debug(myFundIncom[i].Date, myFundIncom[i].Income, myFundIncom[i].Cost, myFundIncomePercent[i].Income)
+	}
+
+	// 根据类型分类，画饼图
+	var fundTypes []FundType
+	for i := 0; i < len(myFundsInfo); i++ { // 先分类
+		find := false
+		for j := 0; j < len(fundTypes); j++ {
+			if fundTypes[j].Name == myFundsInfo[i].FundType {
+				fundTypes[j].Income += myFundsInfo[i].AccumulatedIncome
+				fundTypes[j].Cost += myFundsInfo[i].Cost
+				find = true
+			}
+		}
+		if find == false {
+			var fundType FundType
+			fundType.Name = myFundsInfo[i].FundType
+			fundType.Income += myFundsInfo[i].AccumulatedIncome
+			fundType.Cost += myFundsInfo[i].Cost
+			fundTypes = append(fundTypes, fundType)
+		}
+	}
+
+	var fundTypeItems []FundType
+	for i := 0; i < len(fundTypes); i++ { // 根据分类的顺序增加基金
+		for j := 0; j < len(myFundsInfo); j++ {
+			if fundTypes[i].Name == myFundsInfo[j].FundType {
+				var fundType FundType
+				fundType.Name = myFundsInfo[j].Name
+				fundType.Income += myFundsInfo[j].AccumulatedIncome
+				fundType.Cost += myFundsInfo[j].Cost
+				fundTypeItems = append(fundTypeItems, fundType)
+			}
+		}
 	}
 
 	p.Data["funds"] = myFundsInfo
@@ -87,4 +129,6 @@ func (p *IndexController) Index() {
 	p.Data["accumulatedIncomePercent"] = util.GetFloatFormat(accumulatedIncomePercent, 2)
 	p.Data["monthIncome"] = myFundIncom
 	p.Data["monthIncomePercent"] = myFundIncomePercent
+	p.Data["fundTypes"] = fundTypes
+	p.Data["fundTypeItems"] = fundTypeItems
 }
