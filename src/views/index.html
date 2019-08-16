@@ -11,7 +11,7 @@
 <table>
     <tr>
         <td>
-            <table border="0" cellspacing="10" cellpadding="0" valign="top">
+            <table border="0" cellspacing="5" cellpadding="0" valign="top">
                 <tr>
                     <td valign="top">
                         <table valign="top">
@@ -47,6 +47,29 @@
                         </table>
                     </td>
                 </tr>
+
+
+                <tr>
+                    <td>
+                        <table  border="0" cellspacing="5" cellpadding="0" valign="top">
+                            <tr>
+                                <td><b>分类</b></td>
+                                <td><b>收益</b></td>
+                                <td><b>收益率</b></td>
+                                <td><b>成本</b></td>
+                            </tr>
+                            {{range .fundTypes}}
+                            <tr>
+                                <td>{{.Name}}</td>
+                                <td>{{.Income}}</td>
+                                <td>{{.AccumulatedIncomePercent}}</td>
+                                <td>{{.Cost}}</td>
+                            </tr>
+                            {{end}}
+                        </table>
+                    </td>
+                </tr>
+
                 <tr>
                     <td>
                         <table>

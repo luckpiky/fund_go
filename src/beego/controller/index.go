@@ -31,6 +31,7 @@ type FundType struct {
 	Name string
 	Income float64
 	Cost float64
+	AccumulatedIncomePercent float64
 }
 
 type MyFundsInfo []MyFundInfo
@@ -97,6 +98,7 @@ func (p *IndexController) Index() {
 			if fundTypes[j].Name == myFundsInfo[i].FundType {
 				fundTypes[j].Income += myFundsInfo[i].AccumulatedIncome
 				fundTypes[j].Cost += myFundsInfo[i].Cost
+				fundTypes[j].AccumulatedIncomePercent = util.GetFloatFormat(fundTypes[j].Income * 100 / fundTypes[j].Cost, 2)
 				find = true
 			}
 		}
@@ -105,6 +107,7 @@ func (p *IndexController) Index() {
 			fundType.Name = myFundsInfo[i].FundType
 			fundType.Income += myFundsInfo[i].AccumulatedIncome
 			fundType.Cost += myFundsInfo[i].Cost
+			fundType.AccumulatedIncomePercent = util.GetFloatFormat(fundType.Income * 100 / fundType.Cost, 2)
 			fundTypes = append(fundTypes, fundType)
 		}
 	}
