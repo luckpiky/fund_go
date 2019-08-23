@@ -87,7 +87,7 @@ func (p *IndexController) Index() {
 
 		myFundIncom[i].Income = util.GetFloatFormat(myFundIncom[i].Income, 2)
 
-		logs.Debug(myFundIncom[i].Date, myFundIncom[i].Income, myFundIncom[i].Cost, myFundIncomePercent[i].Income)
+		//logs.Debug(myFundIncom[i].Date, myFundIncom[i].Income, myFundIncom[i].Cost, myFundIncomePercent[i].Income)
 	}
 
 	// 根据类型分类，画饼图
@@ -97,8 +97,11 @@ func (p *IndexController) Index() {
 		for j := 0; j < len(fundTypes); j++ {
 			if fundTypes[j].Name == myFundsInfo[i].FundType {
 				fundTypes[j].Income += myFundsInfo[i].AccumulatedIncome
+				fundTypes[j].Income = util.GetFloatFormat(fundTypes[j].Income, 2)
 				fundTypes[j].Cost += myFundsInfo[i].Cost
-				fundTypes[j].AccumulatedIncomePercent = util.GetFloatFormat(fundTypes[j].Income * 100 / fundTypes[j].Cost, 2)
+				fundTypes[j].Cost = util.GetFloatFormat(fundTypes[j].Cost, 2)
+				fundTypes[j].AccumulatedIncomePercent = fundTypes[j].Income * 100 / fundTypes[j].Cost
+				fundTypes[j].AccumulatedIncomePercent = util.GetFloatFormat(fundTypes[j].AccumulatedIncomePercent, 2)
 				find = true
 			}
 		}
@@ -106,7 +109,9 @@ func (p *IndexController) Index() {
 			var fundType FundType
 			fundType.Name = myFundsInfo[i].FundType
 			fundType.Income += myFundsInfo[i].AccumulatedIncome
+			fundType.Income = util.GetFloatFormat(fundType.Income, 2)
 			fundType.Cost += myFundsInfo[i].Cost
+			fundType.Cost = util.GetFloatFormat(fundType.Cost, 2)
 			fundType.AccumulatedIncomePercent = util.GetFloatFormat(fundType.Income * 100 / fundType.Cost, 2)
 			fundTypes = append(fundTypes, fundType)
 		}
@@ -119,7 +124,9 @@ func (p *IndexController) Index() {
 				var fundType FundType
 				fundType.Name = myFundsInfo[j].Name
 				fundType.Income += myFundsInfo[j].AccumulatedIncome
+				fundType.Income = util.GetFloatFormat(fundType.Income, 2)
 				fundType.Cost += myFundsInfo[j].Cost
+				fundType.Cost = util.GetFloatFormat(fundType.Cost, 2)
 				fundTypeItems = append(fundTypeItems, fundType)
 			}
 		}
