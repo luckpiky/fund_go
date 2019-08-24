@@ -225,6 +225,7 @@ type FundIncomeData struct {
 	Units float64  //基金份额
 	Cost float64   // 成本
 	AccumulatedIncome float64  // 累计收益
+	HoldingIncome float64
 }
 
 /* 获取指定基金的历史收益 */
@@ -236,11 +237,14 @@ func GetInComeData(code string) (income []FundIncomeData) {
 	units := 0.0
 	cost := 0.0
 	accumulatedIncome := 0.0
+	holdingIncome := 0.0
 	
 	j := 0
 	for i := 0; i < len(priceData); i++ {
 		first := false
 		pay := 0.0
+
+		sell := false
 		if (priceData[i].Date == transData[j].Date) {
 			if units == 0 {
 				first = true
@@ -252,6 +256,13 @@ func GetInComeData(code string) (income []FundIncomeData) {
 			}
 
 			cost += transData[j].Amount
+
+			if (transData[j].Units < 0) {
+				// 剩余收益 = 持有收益 × （总份额 - 卖出份额） / 总份额 - 费用
+				holdingIncome = holdingIncome * (units + transData[j].Units) / units - pay
+				log.Println("卖出，持有收益：", holdingIncome)
+				sell = true
+			}
 
 			dateStr := time.Unix(priceData[i].Date, 0).Format("2006-01-02 15:04:05") 
 			log.Println(dateStr, "购买基金份额：", transData[j].Units, "交易金额：", transData[j].Amount, "交易费用：", pay)
@@ -271,13 +282,19 @@ func GetInComeData(code string) (income []FundIncomeData) {
 
 			income.Income = util.GetFloatFormat(income.Income, 2)
 			
+			// 计算累计收益，将每个交易日的收益相加
 			accumulatedIncome += income.Income
-			income.AccumulatedIncome += accumulatedIncome
+			income.AccumulatedIncome = accumulatedIncome
+
+			if (!sell) {
+				holdingIncome += income.Income
+			}
+			income.HoldingIncome = holdingIncome
 	
 			incomeData = append(incomeData, income)
 	
 			dateStr := time.Unix(priceData[i].Date, 0).Format("2006-01-02 15:04:05") 
-			log.Println(dateStr, "基金收益：", income.Income, " 基金份额：", units)
+			log.Println(dateStr, "基金收益：", income.Income, " 基金份额：", units, "持有收益:", income.HoldingIncome)
 		}
 
 		// 交易当天不能计算收益
