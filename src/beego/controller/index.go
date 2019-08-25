@@ -55,6 +55,8 @@ func (p *IndexController) Index() {
 	var myFundsInfo MyFundsInfo
 	accumulatedIncome := 0.0
 	accumulatedIncomePercent := 0.0
+	handlingIncome := 0.0
+	handlingIncomePercent := 0.0
 	cost := 0.0
 	
 	for code := range analyze.MyFundsList {
@@ -67,6 +69,7 @@ func (p *IndexController) Index() {
 		myFundsInfo = append(myFundsInfo, fundInfo)
 
 		accumulatedIncome += fundInfo.AccumulatedIncome
+		handlingIncome += fundInfo.HandlingIncome
 		cost += fundInfo.Cost
 
 		monthIncome := analyze.GetFundIncomeByMonthInRecentYear(code)
@@ -79,6 +82,7 @@ func (p *IndexController) Index() {
 
 	if (cost > 0) {
 		accumulatedIncomePercent = accumulatedIncome * 100 / cost
+		handlingIncomePercent = handlingIncome * 100 /cost
 	}
 
 	sort.Stable(myFundsInfo)
@@ -140,6 +144,10 @@ func (p *IndexController) Index() {
 	p.Data["accumulatedIncome"] = util.GetFloatFormat(accumulatedIncome, 2)
 	p.Data["cost"] = util.GetFloatFormat(cost, 2)
 	p.Data["accumulatedIncomePercent"] = util.GetFloatFormat(accumulatedIncomePercent, 2)
+	p.Data["handlingIncome"] = util.GetFloatFormat(handlingIncome, 2)
+	p.Data["handlingIncomePercent"] = util.GetFloatFormat(handlingIncomePercent, 2)
+
+
 	p.Data["monthIncome"] = myFundIncom
 	p.Data["monthIncomePercent"] = myFundIncomePercent
 	p.Data["fundTypes"] = fundTypes
