@@ -392,3 +392,16 @@ func GetFundAccumulatedIncome(code string) (float64, float64, float64) {
 	
 	return 0.0, 0.0, 0.0
 }
+
+func GetFundHandlingIncome(code string) (float64, float64) {
+	incomeData := GetInComeData(code)
+	if (len(incomeData) > 0) {
+		handlingIncome := incomeData[len(incomeData)-1].HoldingIncome
+		handlingIncomePercent := handlingIncome * 100 / incomeData[len(incomeData)-1].Cost
+
+		return util.GetFloatFormat(handlingIncome, 2),
+			   util.GetFloatFormat(handlingIncomePercent, 2)
+	}
+	
+	return 0.0, 0.0
+}

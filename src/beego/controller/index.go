@@ -18,6 +18,8 @@ type MyFundInfo struct {
 	FundType string
 	AccumulatedIncome float64
 	AccumulatedIncomePercent float64
+	HandlingIncome float64
+	HandlingIncomePercent float64
 	Cost float64
 }
 
@@ -61,6 +63,7 @@ func (p *IndexController) Index() {
 		fundInfo.Name = analyze.MyFundsList[code][0]
 		fundInfo.FundType = analyze.MyFundsList[code][1]
 		fundInfo.AccumulatedIncome, fundInfo.AccumulatedIncomePercent, fundInfo.Cost = analyze.GetFundAccumulatedIncome(code)
+		fundInfo.HandlingIncome, fundInfo.HandlingIncomePercent = analyze.GetFundHandlingIncome(code)
 		myFundsInfo = append(myFundsInfo, fundInfo)
 
 		accumulatedIncome += fundInfo.AccumulatedIncome

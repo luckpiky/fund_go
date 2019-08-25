@@ -78,6 +78,7 @@
                                 <td><b>基金名称</b></td>
                                 <td><b>基金类型</b></td>
                                 <td><b>累计收益</b></td>
+                                <td><b>持有收益</b></td>
                                 <td><b>收益率</b></td>
                                 <td><b>成本</b></td>
                                 <td><b>操作</b></td>
@@ -88,7 +89,8 @@
                                 <td>{{.Name}}</td>
                                 <td>{{.FundType}}</td>
                                 <td>{{.AccumulatedIncome}}</td>
-                                <td>{{.AccumulatedIncomePercent}}%</td>
+                                <td>{{.HandlingIncome}}</td>
+                                <td>{{.HandlingIncomePercent}}%</td>
                                 <td>{{.Cost}}</td>
                                 <td><a href="/fundinfo?code={{.Code}}">查看</a></td>
                             </tr>

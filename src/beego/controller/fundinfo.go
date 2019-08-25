@@ -41,6 +41,7 @@ func (p *GetFundInfo) Get() {
 
 	// 累计收益
 	p.Data["accumulatedIncome"],p.Data["accumulatedIncomePercent"],p.Data["cost"] = analyze.GetFundAccumulatedIncome(code)
+	p.Data["handlingIncome"], p.Data["handlingIncomePercent"] = analyze.GetFundHandlingIncome(code)
 
 	p.TplName = "fundinfo.html"
 }
