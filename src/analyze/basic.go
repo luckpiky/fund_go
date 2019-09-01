@@ -59,7 +59,8 @@ func GetAllFundsList() {
 
 	//第一行数据跳过
 	for i := 1; i < len(fundsData); i++ {
-		AllFundsList[fundsData[i][0]] = []string{fundsData[i][1], fundsData[i][2]}
+		// 用基金编码作为索引，值为基金名称，基金类型，风险类型
+		AllFundsList[fundsData[i][0]] = []string{fundsData[i][1], fundsData[i][2], fundsData[i][3]}
 	}
 }
 

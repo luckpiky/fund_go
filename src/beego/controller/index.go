@@ -16,6 +16,7 @@ type MyFundInfo struct {
 	Code string
 	Name string
 	FundType string
+	Risk string
 	AccumulatedIncome float64
 	AccumulatedIncomePercent float64
 	HandlingIncome float64
@@ -64,6 +65,7 @@ func (p *IndexController) Index() {
 		fundInfo.Code = code
 		fundInfo.Name = analyze.MyFundsList[code][0]
 		fundInfo.FundType = analyze.MyFundsList[code][1]
+		fundInfo.Risk = analyze.MyFundsList[code][2]
 		fundInfo.AccumulatedIncome, fundInfo.AccumulatedIncomePercent, fundInfo.Cost = analyze.GetFundAccumulatedIncome(code)
 		fundInfo.HandlingIncome, fundInfo.HandlingIncomePercent = analyze.GetFundHandlingIncome(code)
 		myFundsInfo = append(myFundsInfo, fundInfo)
@@ -139,6 +141,35 @@ func (p *IndexController) Index() {
 		}
 	}
 
+	// 按照风险类型分类
+	var fundRisk []FundType
+	for i := 0; i < len(myFundsInfo); i++ {
+		match := false
+		for j := 0; j < len(fundRisk); j++ {
+			if myFundsInfo[i].Risk == fundRisk[j].Name {
+				fundRisk[j].Income += myFundsInfo[i].AccumulatedIncome
+				fundRisk[j].Cost += myFundsInfo[i].Cost
+				fundRisk[j].AccumulatedIncomePercent = fundRisk[j].Income * 100 / fundRisk[j].Cost
+
+				fundRisk[j].Income = util.GetFloatFormat(fundRisk[j].Income, 2)
+				fundRisk[j].Cost = util.GetFloatFormat(fundRisk[j].Cost, 2)
+				fundRisk[j].AccumulatedIncomePercent = util.GetFloatFormat(fundRisk[j].AccumulatedIncomePercent, 2)
+				match = true
+			}
+		}
+
+		if match == false {
+			var risk FundType
+			risk.Name = myFundsInfo[i].Risk
+			risk.Income = myFundsInfo[i].AccumulatedIncome
+			risk.Cost = myFundsInfo[i].Cost
+			risk.AccumulatedIncomePercent = risk.Income * 100 / risk.Cost
+			risk.AccumulatedIncomePercent = util.GetFloatFormat(risk.AccumulatedIncomePercent, 2)
+			fundRisk = append(fundRisk, risk)
+		}
+
+	}
+
 	p.Data["funds"] = myFundsInfo
 	p.Data["num"] = len(myFundsInfo)
 	p.Data["accumulatedIncome"] = util.GetFloatFormat(accumulatedIncome, 2)
@@ -152,4 +183,5 @@ func (p *IndexController) Index() {
 	p.Data["monthIncomePercent"] = myFundIncomePercent
 	p.Data["fundTypes"] = fundTypes
 	p.Data["fundTypeItems"] = fundTypeItems
+	p.Data["fundRisk"] = fundRisk
 }

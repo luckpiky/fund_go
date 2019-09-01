@@ -55,21 +55,45 @@
 
                 <tr>
                     <td>
-                        <table  border="0" cellspacing="5" cellpadding="0" valign="top">
+                        <table>
                             <tr>
-                                <td><b>分类</b></td>
-                                <td><b>收益</b></td>
-                                <td><b>收益率</b></td>
-                                <td><b>成本</b></td>
+                                <td>
+                                    <table  border="0" cellspacing="5" cellpadding="0" valign="top">
+                                        <tr>
+                                            <td><b>分类</b></td>
+                                            <td><b>收益</b></td>
+                                            <td><b>收益率</b></td>
+                                            <td><b>成本</b></td>
+                                        </tr>
+                                        {{range .fundTypes}}
+                                        <tr>
+                                            <td>{{.Name}}</td>
+                                            <td>{{.Income}}</td>
+                                            <td>{{.AccumulatedIncomePercent}}%</td>
+                                            <td>{{.Cost}}</td>
+                                        </tr>
+                                        {{end}}
+                                    </table>
+                                </td>
+                                <td>
+                                    <table  border="0" cellspacing="5" cellpadding="0" valign="top">
+                                        <tr>
+                                            <td><b>分类</b></td>
+                                            <td><b>收益</b></td>
+                                            <td><b>收益率</b></td>
+                                            <td><b>成本</b></td>
+                                        </tr>
+                                        {{range .fundRisk}}
+                                        <tr>
+                                            <td>{{.Name}}</td>
+                                            <td>{{.Income}}</td>
+                                            <td>{{.AccumulatedIncomePercent}}%</td>
+                                            <td>{{.Cost}}</td>
+                                        </tr>
+                                        {{end}}
+                                    </table>
+                                </td>
                             </tr>
-                            {{range .fundTypes}}
-                            <tr>
-                                <td>{{.Name}}</td>
-                                <td>{{.Income}}</td>
-                                <td>{{.AccumulatedIncomePercent}}%</td>
-                                <td>{{.Cost}}</td>
-                            </tr>
-                            {{end}}
                         </table>
                     </td>
                 </tr>
@@ -78,9 +102,10 @@
                     <td>
                         <table>
                             <tr>
-                                <td><b>基金编码</b></td>
-                                <td><b>基金名称</b></td>
-                                <td><b>基金类型</b></td>
+                                <td><b>编码</b></td>
+                                <td><b>名称</b></td>
+                                <td><b>类型</b></td>
+                                <td><b>风险</b></td>
                                 <td><b>累计收益</b></td>
                                 <td><b>持有收益</b></td>
                                 <td><b>收益率</b></td>
@@ -92,6 +117,7 @@
                                 <td>{{.Code}}</td>
                                 <td>{{.Name}}</td>
                                 <td>{{.FundType}}</td>
+                                <td>{{.Risk}}</td>
                                 <td>{{.AccumulatedIncome}}</td>
                                 <td>{{.HandlingIncome}}</td>
                                 <td>{{.HandlingIncomePercent}}%</td>
