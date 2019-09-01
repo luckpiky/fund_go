@@ -4,11 +4,21 @@
   程序名：catch_data
   描述：从新浪基金数据网站获取数据，通过程序参数指定基金编码，获取的页面数，以及存储的csv文件。  
   参数：  
-  -p n 指定读取的页数  
-  -a 指定读取所有页的内容  
-  -d 指定csv的目录  
-  -c 处理的基金的编码  
-  -s 基金列表文件路径，采用此参数可以进行批量更新
+  -a    读取所有的页数
+  -c string
+        基金编码
+  -catch
+        数据抓取
+  -d string
+        csv文件输出目录 (default "./")
+  -graceful
+        listen on open fd (after forking)
+  -p int
+        读取的页数 (default 1)
+  -runserver
+        运行服务
+  -s string
+        基金列表文件路径，采用此参数可以进行批量更新
 
 ```
 @startuml
