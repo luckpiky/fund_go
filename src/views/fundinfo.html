@@ -36,6 +36,10 @@
                     <td><b>成本：</b></td>
                     <td>{{.cost}}</td>
                 </tr>
+                <tr>
+                    <td><b>最新价格：</b></td>
+                    <td>{{.date | getday}} : {{.jjjz}} | {{.Ljjz}} | {{.curRate}}%</td>
+                </tr>
             </table>
         </td>
         <td><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
@@ -76,7 +80,7 @@
             xAxis: {
                 type: 'category',
                 boundaryGap: false,
-                data: [{{range .price}}'{{.Date}}',{{end}}]
+                data: [{{range .price}}'{{.Date | getday }}',{{end}}]
             },
             yAxis: {
                 type: 'value'
@@ -130,7 +134,7 @@
             xAxis: {
                 type: 'category',
                 boundaryGap: false,
-                data: [{{range .growth2}}'{{.Date}}',{{end}}]
+                data: [{{range .growth2}}'{{.Date | getday}}',{{end}}]
             },
             yAxis: {
                 type: 'value'

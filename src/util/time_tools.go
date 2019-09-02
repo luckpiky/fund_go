@@ -82,3 +82,19 @@ func Int64ToMonthStr(in int64) (out string) {
 	out = tm.Format("2006-01")
 	return out
 }
+
+func Int64ToDayStr(in int64) (out string) {
+	tm := time.Unix(in, 0)
+	out = tm.Format("2006-01-01")
+	return out
+}
+
+func TimeStrToDay(in string) (out string) {
+	// 2006-1-2 03:04:05 to 2006-1-2
+	s := strings.Split(in, " ")
+	if len(s) >= 2 {
+		return s[0]
+	}
+
+	return in
+}

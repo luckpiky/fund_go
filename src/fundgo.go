@@ -21,6 +21,7 @@ func main() {
 	} else if *runserver == true {
 		beego.SetStaticPath("js","views/js")
 		beego.AddFuncMap("convertmonth", util.Int64ToMonthStr)
+		beego.AddFuncMap("getday", util.TimeStrToDay)
 		beego.Run()
 	}
 }
