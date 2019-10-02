@@ -1,0 +1,1 @@
+.\fundgo.exe  --runserver
