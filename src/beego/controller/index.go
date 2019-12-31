@@ -185,7 +185,6 @@ func (p *IndexController) Index() {
 	p.Data["handlingIncome"] = util.GetFloatFormat(handlingIncome, 0)
 	p.Data["handlingIncomePercent"] = util.GetFloatFormat(handlingIncomePercent, 2)
 
-
 	p.Data["monthIncome"] = myFundIncom
 	p.Data["monthIncomePercent"] = myFundIncomePercent
 	p.Data["fundTypes"] = fundTypes
