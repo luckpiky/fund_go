@@ -299,3 +299,49 @@ func GetTransData2(code string) ([]FundTransData2) {
 
 	return transList
 }
+
+// 获取每次交易后的份额和成本
+func GetTransCost(code string) ([]FundTransData2) {
+	transData := GetTransData2(code)
+	var costList []FundTransData2
+
+	units := 0.0
+	amount := 0.0
+
+	log.Println(code, ", 读取到基金交易数据条目数：", len(transData))
+	
+	for i := 0; i < len(transData); i++ {
+
+		var cost FundTransData2
+		cost.Date = transData[i].Date
+		
+		//amount = transData[i].Amount + amount
+		if transData[i].Units >= 0 {
+			amount = transData[i].Amount + amount
+		} else {
+			amount = amount * (transData[i].Units + units) /  units;
+		}
+
+		units = transData[i].Units + units
+
+		cost.Units = units
+		cost.Amount = util.GetFloatFormat(amount, 2)
+		costList = append(costList, cost)
+
+		log.Println(cost.Date, units, amount, transData[i].Amount)
+	}
+
+	return costList
+}                                                                                     
+
+// 获取当前的成本
+func GetCurrentCost(code string) (float64) {
+	costList := GetTransCost(code)
+
+	count := len(costList)
+	if count > 0{
+		return costList[count-1].Amount
+	}
+
+	return 0;
+}

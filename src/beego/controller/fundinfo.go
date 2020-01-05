@@ -41,7 +41,7 @@ func (p *GetFundInfo) Get() {
 	p.Data["monthIncome"] = analyze.GetFundIncomeByMonthInRecentYear(code)
 
 	// 累计收益
-	p.Data["accumulatedIncome"],p.Data["accumulatedIncomePercent"],p.Data["cost"] = analyze.GetFundAccumulatedIncome(code)
+	p.Data["accumulatedIncome"],p.Data["accumulatedIncomePercent"],p.Data["handlingUnits"], p.Data["cost"] = analyze.GetFundAccumulatedIncome(code)
 	p.Data["handlingIncome"], p.Data["handlingIncomePercent"] = analyze.GetFundHandlingIncome(code)
 
 	// 最新净值，累计价值
@@ -61,6 +61,8 @@ func (p *GetFundInfo) Get() {
 	p.Data["jjjz"] = price[index].Jjjz
 	p.Data["Ljjz"] = price[index].Ljjz
 	p.Data["date"] = price[index].Date
+	
+	p.Data["costList"] = analyze.GetTransCost(code)
 
 	p.TplName = "fundinfo.html"
 }

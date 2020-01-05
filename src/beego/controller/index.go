@@ -66,7 +66,7 @@ func (p *IndexController) Index() {
 		fundInfo.Name = analyze.MyFundsList[code][0]
 		fundInfo.FundType = analyze.MyFundsList[code][1]
 		fundInfo.Risk = analyze.MyFundsList[code][2]
-		fundInfo.AccumulatedIncome, fundInfo.AccumulatedIncomePercent, fundInfo.Cost = analyze.GetFundAccumulatedIncome(code)
+		fundInfo.AccumulatedIncome, fundInfo.AccumulatedIncomePercent, _, fundInfo.Cost = analyze.GetFundAccumulatedIncome(code)
 		fundInfo.HandlingIncome, fundInfo.HandlingIncomePercent = analyze.GetFundHandlingIncome(code)
 		myFundsInfo = append(myFundsInfo, fundInfo)
 

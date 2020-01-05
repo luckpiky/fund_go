@@ -244,7 +244,9 @@ func GetInComeData(code string) (income []FundIncomeData) {
 		first := false
 		pay := 0.0
 
-		sell := false
+		//sell := false
+
+		// 存在交易
 		if (priceData[i].Date == transData[j].Date) {
 			if units == 0 {
 				first = true
@@ -255,18 +257,27 @@ func GetInComeData(code string) (income []FundIncomeData) {
 				pay = util.GetFloatFormat(pay, 2)
 			}
 
-			cost += transData[j].Amount
-
-			if (transData[j].Units < 0) {
-				// 剩余收益 = 持有收益 × （总份额 - 卖出份额） / 总份额 - 费用
-				holdingIncome = holdingIncome * (units + transData[j].Units) / units - pay
-				log.Println("卖出，持有收益：", holdingIncome)
-				sell = true
+			// 卖出时，成本剩余按照比例计算
+			if  transData[j].Units >= 0 {
+				cost += transData[j].Amount
+			} else {
+				cost = cost * (units + transData[j].Units) / units
 			}
 
+			//if (transData[j].Units < 0) {
+				// 剩余收益 = 持有收益 × （总份额 - 卖出份额） / 总份额 - 费用
+			//	holdingIncome = holdingIncome * (units + transData[j].Units) / units - pay
+			//	log.Println("卖出，持有收益：", holdingIncome)
+			//	sell = true
+			//}
+
 			dateStr := time.Unix(priceData[i].Date, 0).Format("2006-01-02 15:04:05") 
-			log.Println(dateStr, "购买基金份额：", transData[j].Units, "交易金额：", transData[j].Amount, "交易费用：", pay)
+			log.Println(dateStr, "购买基金份额：", transData[j].Units, "交易金额：", transData[j].Amount, "交易费用：", pay, "累计成本：", cost)
 		}
+
+		// 持有收益 = 份额 * 基金净值 - 成本
+		holdingIncome = priceData[i].Jjjz * units - cost
+		log.Println(units, cost, holdingIncome)
 
 		if (units != 0 || first) {
 			var income FundIncomeData
@@ -286,10 +297,16 @@ func GetInComeData(code string) (income []FundIncomeData) {
 			accumulatedIncome += income.Income
 			income.AccumulatedIncome = accumulatedIncome
 
-			if (!sell) {
-				holdingIncome += income.Income
+			//if (!sell) {
+			//	holdingIncome += income.Income
+			//}
+			if (units + transData[j].Units == 0) {
+				income.HoldingIncome = 0
+			} else {
+				income.HoldingIncome = holdingIncome
 			}
-			income.HoldingIncome = holdingIncome
+			
+			log.Println(holdingIncome)
 	
 			incomeData = append(incomeData, income)
 	
@@ -378,19 +395,23 @@ func GetFundIncomeByMonthInRecentYear(code string) (income []FundIncomeData)  {
 	return incomeData3
 }
 
-func GetFundAccumulatedIncome(code string) (float64, float64, float64) {
+func GetFundAccumulatedIncome(code string) (float64, float64, float64, float64) {
 	incomeData := GetInComeData(code)
 	if (len(incomeData) > 0) {
-		accumulatedIncome := incomeData[len(incomeData)-1].AccumulatedIncome
+		
+		units := incomeData[len(incomeData)-1].Units
 		cost := incomeData[len(incomeData)-1].Cost
+
+		accumulatedIncome := incomeData[len(incomeData)-1].AccumulatedIncome
 		accumulatedIncomePercent := accumulatedIncome * 100 / incomeData[len(incomeData)-1].Cost
 
 		return util.GetFloatFormat(accumulatedIncome, 2),
 			   util.GetFloatFormat(accumulatedIncomePercent, 2),
+			   util.GetFloatFormat(units, 2),
 			   util.GetFloatFormat(cost, 2)
 	}
 	
-	return 0.0, 0.0, 0.0
+	return 0.0, 0.0, 0.0, 0.0
 }
 
 func GetFundHandlingIncome(code string) (float64, float64) {
@@ -398,6 +419,11 @@ func GetFundHandlingIncome(code string) (float64, float64) {
 	if (len(incomeData) > 0) {
 		handlingIncome := incomeData[len(incomeData)-1].HoldingIncome
 		handlingIncomePercent := handlingIncome * 100 / incomeData[len(incomeData)-1].Cost
+
+		if incomeData[len(incomeData)-1].Cost == 0 {
+			handlingIncome = 0
+			handlingIncomePercent = 0
+		}
 
 		return util.GetFloatFormat(handlingIncome, 2),
 			   util.GetFloatFormat(handlingIncomePercent, 2)

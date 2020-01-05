@@ -29,7 +29,11 @@
                     <td>{{.accumulatedIncome}} | {{.accumulatedIncomePercent}}%</td>
                 </tr>
                 <tr>
-                    <td><b>收益持有：</b></td>
+                    <td><b>持有份额：</b></td>
+                    <td>{{.handlingUnits}}</td>
+                </tr>
+                <tr>
+                    <td><b>持有收益：</b></td>
                     <td>{{.handlingIncome}} | {{.handlingIncomePercent}}%</td>
                 </tr>
                 <tr>
@@ -47,6 +51,10 @@
     <tr>
         <td><div id="main" style="width: 600px;height:400px;"></div></td>
         <td><div id="main2" style="width: 600px;height:400px;"></div></td>
+    </tr>
+    <tr>
+        <td><div id="costList" style="width: 600px;height:400px;"></div></td>
+        <td><div id="units" style="width: 600px;height:400px;"></div></td>
     </tr>
 </table>
 </body>
@@ -209,3 +217,52 @@
     myChart.setOption(option);
 </script>
 
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('costList'));
+
+    // 指定图表的配置项和数据
+    option = {
+        title : {
+            text: '成本',
+        },
+        tooltip : {
+            trigger: 'axis'
+        },
+        legend: {
+            data:['成本','月份']
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                mark : {show: true},
+                dataView : {show: true, readOnly: false},
+                magicType : {show: true, type: ['line', 'bar']},
+                restore : {show: true},
+                saveAsImage : {show: true}
+            }
+        },
+        calculable : true,
+        xAxis : [
+            {
+                type : 'category',
+                data : [{{range .costList}}'{{.Date | convertday}}',{{end}}]
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'成本',
+                type:'bar',
+                data:[{{range .costList}}'{{.Amount}}',{{end}}],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
