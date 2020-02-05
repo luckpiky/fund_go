@@ -335,19 +335,24 @@ func GetFundIncomeByTimeRange(code string, incomeData []FundIncomeData, time1 in
 	income := 0.0
 	cost := 0.0
 
+	startDayStr := time.Unix(time1, 0).Format("2006-01-02 15:04:05") 
+	endDayStr := time.Unix(time2, 0).Format("2006-01-02 15:04:05") 
+	log.Println("取时间范围内的收益：", startDayStr, endDayStr)
+
 	for i := 0; i < len(incomeData); i++ {
 		if (time1 <= incomeData[i].Date && time2 >= incomeData[i].Date) {
 			begin = true
 		}
 
+		if (time2 < incomeData[i].Date) {
+			break
+		}
+
 		if begin {
 			income += incomeData[i].Income
 			cost = incomeData[i].Cost
-			//log.Println(incomeData[i].Date, incomeData[i].Income, incomeData[i].Cost)
-		}
-
-		if (time2 < incomeData[i].Date) {
-			break
+			dayStr := time.Unix(incomeData[i].Date, 0).Format("2006-01-02 15:04:05") 
+			log.Println(dayStr, "日收益", incomeData[i].Income, "时间范围内累计收益：", income)
 		}
 	}
 
@@ -364,7 +369,7 @@ func GetFundIncomeByMonthInRecentYear(code string) (income []FundIncomeData)  {
 
 	for i := 0; i < 12; i++ {
 		firstDay := strconv.Itoa(year) + "-" + strconv.Itoa(int(month)) + "-1 00:00:00"
-		//log.Println(firstDay)
+		log.Println(firstDay)
 		firstDayInt := util.TimeStr2Int64_2(firstDay)
 		firstDayTime := time.Unix(firstDayInt, 0)
 		lastDayTime := firstDayTime.AddDate(0, 1, -1)
@@ -376,7 +381,7 @@ func GetFundIncomeByMonthInRecentYear(code string) (income []FundIncomeData)  {
 		income.Code = code
 		incomeData2 = append(incomeData2, income)
 
-		//log.Println(firstDay, "收益：", income)
+		log.Println(firstDay, "------收益：", income)
 
 		if (month == 1) {
 			month = 12

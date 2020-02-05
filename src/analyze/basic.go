@@ -332,16 +332,25 @@ func GetTransCost(code string) ([]FundTransData2) {
 	}
 
 	return costList
-}                                                                                     
+}
 
 // 获取当前的成本
 func GetCurrentCost(code string) (float64) {
 	costList := GetTransCost(code)
 
 	count := len(costList)
-	if count > 0{
+	if count > 0 {
 		return costList[count-1].Amount
 	}
 
 	return 0;
 }
+
+//func GetCostListAllDay(code string) ([]FundTransData2) {
+//	costList := GetTransCost(code)
+//	var costListResult []FundTransData2
+
+	
+
+//	return costListResult
+//}
