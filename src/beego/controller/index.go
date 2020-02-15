@@ -136,7 +136,9 @@ func (p *IndexController) Index() {
 				fundType.Income = util.GetFloatFormat(fundType.Income, 0)
 				fundType.Cost += myFundsInfo[j].Cost
 				fundType.Cost = util.GetFloatFormat(fundType.Cost, 0)
-				fundTypeItems = append(fundTypeItems, fundType)
+				if fundType.Cost > 0 {
+					fundTypeItems = append(fundTypeItems, fundType)
+				}
 			}
 		}
 	}
