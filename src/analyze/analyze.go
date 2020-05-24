@@ -37,6 +37,9 @@ type FundAnalyzeData struct {
 }
 
 func ReadFundTransactionData(path string, analyzeData FundAnalyzeData) {
+
+	log.Println("ReadFundTransactionData, path=", path)
+
 	var transData [][] string
 
 	fileName := path + "/fund_transaction.csv"
@@ -230,6 +233,9 @@ type FundIncomeData struct {
 
 /* 获取指定基金的历史收益 */
 func GetInComeData(code string) (income []FundIncomeData) {
+
+	log.Println("GetInComeData, code=", code)
+
 	transData := GetTransData2(code)
 	priceData := GetFundPriceData(code)
 	var incomeData []FundIncomeData
@@ -244,7 +250,8 @@ func GetInComeData(code string) (income []FundIncomeData) {
 		first := false
 		pay := 0.0
 
-		//sell := false
+		// 持有收益 = 份额 * 基金净值 - 成本
+		holdingIncome = priceData[i].Jjjz * units - cost
 
 		// 存在交易
 		if (priceData[i].Date == transData[j].Date) {
@@ -264,20 +271,9 @@ func GetInComeData(code string) (income []FundIncomeData) {
 				cost = cost * (units + transData[j].Units) / units
 			}
 
-			//if (transData[j].Units < 0) {
-				// 剩余收益 = 持有收益 × （总份额 - 卖出份额） / 总份额 - 费用
-			//	holdingIncome = holdingIncome * (units + transData[j].Units) / units - pay
-			//	log.Println("卖出，持有收益：", holdingIncome)
-			//	sell = true
-			//}
-
 			dateStr := time.Unix(priceData[i].Date, 0).Format("2006-01-02 15:04:05") 
 			log.Println(dateStr, "购买基金份额：", transData[j].Units, "交易金额：", transData[j].Amount, "交易费用：", pay, "累计成本：", cost)
 		}
-
-		// 持有收益 = 份额 * 基金净值 - 成本
-		holdingIncome = priceData[i].Jjjz * units - cost
-		log.Println(units, cost, holdingIncome)
 
 		if (units != 0 || first) {
 			var income FundIncomeData
@@ -292,26 +288,24 @@ func GetInComeData(code string) (income []FundIncomeData) {
 			}
 
 			income.Income = util.GetFloatFormat(income.Income, 2)
-			
+
 			// 计算累计收益，将每个交易日的收益相加
 			accumulatedIncome += income.Income
 			income.AccumulatedIncome = accumulatedIncome
 
-			//if (!sell) {
-			//	holdingIncome += income.Income
-			//}
 			if (units + transData[j].Units == 0) {
 				income.HoldingIncome = 0
 			} else {
 				income.HoldingIncome = holdingIncome
 			}
-			
-			log.Println(holdingIncome)
 	
 			incomeData = append(incomeData, income)
 	
-			dateStr := time.Unix(priceData[i].Date, 0).Format("2006-01-02 15:04:05") 
-			log.Println(dateStr, "基金收益：", income.Income, " 基金份额：", units, "持有收益:", income.HoldingIncome)
+			// 存在交易才打印数据
+			if (priceData[i].Date == transData[j].Date) {
+				dateStr := time.Unix(priceData[i].Date, 0).Format("2006-01-02 15:04:05") 
+				log.Println(dateStr, "基金收益：", income.Income, " 基金份额：", units + transData[j].Units, "持有收益:", income.HoldingIncome)
+			}
 		}
 
 		// 交易当天不能计算收益
@@ -331,6 +325,9 @@ func GetInComeData(code string) (income []FundIncomeData) {
 
 /* 获取指定时间范围的基金收益 */
 func GetFundIncomeByTimeRange(code string, incomeData []FundIncomeData, time1 int64, time2 int64) (float64, float64) {
+
+	log.Println("GetFundIncomeByTimeRange, code=", code)
+
 	begin := false
 	income := 0.0
 	cost := 0.0
@@ -361,6 +358,9 @@ func GetFundIncomeByTimeRange(code string, incomeData []FundIncomeData, time1 in
 
 /* 获取最近一年中每月的基金收益 */
 func GetFundIncomeByMonthInRecentYear(code string) (income []FundIncomeData)  {
+
+	log.Println("GetFundIncomeByMonthInRecentYear, code=", code)
+
 	incomeData := GetInComeData(code)
 	var incomeData2 []FundIncomeData
 
@@ -401,6 +401,9 @@ func GetFundIncomeByMonthInRecentYear(code string) (income []FundIncomeData)  {
 }
 
 func GetFundAccumulatedIncome(code string) (float64, float64, float64, float64) {
+
+	log.Println("GetFundAccumulatedIncome, code=", code)
+
 	incomeData := GetInComeData(code)
 	if (len(incomeData) > 0) {
 		

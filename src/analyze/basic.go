@@ -73,6 +73,9 @@ func GetFundBasicInfoByCode(code string) (info []string) {
 }
 
 func GetMyFundsList() {
+
+	log.Println("GetMyFundsList")
+
 	var transData [][] string
 
 	fileName := dataPath + "/fund_transaction.csv"
@@ -181,6 +184,9 @@ func GetGrowthRateFromBeginByCode(code string, startDate string) (rate []FundGro
 
 
 func GetTransData(code string) ([]FundTrans) {
+
+	log.Println("GetTransData, code=", code)
+
 	var transList []FundTrans
 	var transData [][] string
 
@@ -270,6 +276,9 @@ func GetFundPriceData(code string) (price []FundPriceData2) {
 }
 
 func GetTransData2(code string) ([]FundTransData2) {
+
+	log.Println("GetTransData2, code=", code)
+
 	var transList []FundTransData2
 	var transData [][] string
 
@@ -302,6 +311,9 @@ func GetTransData2(code string) ([]FundTransData2) {
 
 // 获取每次交易后的份额和成本
 func GetTransCost(code string) ([]FundTransData2) {
+
+	log.Println("GetTransCost, code=", code)
+
 	transData := GetTransData2(code)
 	var costList []FundTransData2
 
@@ -314,8 +326,7 @@ func GetTransCost(code string) ([]FundTransData2) {
 
 		var cost FundTransData2
 		cost.Date = transData[i].Date
-		
-		//amount = transData[i].Amount + amount
+
 		if transData[i].Units >= 0 {
 			amount = transData[i].Amount + amount
 		} else {
