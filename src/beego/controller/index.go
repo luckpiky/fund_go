@@ -41,7 +41,7 @@ type MyFundsInfo []MyFundInfo
 
 func (s MyFundsInfo) Len() int { return len(s) }
 func (s MyFundsInfo) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-func (s MyFundsInfo) Less(i, j int) bool { return s[i].AccumulatedIncome > s[j].AccumulatedIncome }
+func (s MyFundsInfo) Less(i, j int) bool { return s[i].Cost > s[j].Cost }
 
 func (p *IndexController) Index() {
 	logs.Debug("enter index controller.....")

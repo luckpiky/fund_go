@@ -18,6 +18,9 @@ class FundPrice:
     jjjz = 0.0 #基金净值
     ljjz = 0.0 #累计净值
     rate = 0.0 #日增长率
+    rateYear = 0.0 #最近1年的收益
+    rateYear3 = 0.0 #最近3年的收益
+    rateYear5 = 0.0 #最近5年的收益
 
 class FundIncome:
     units = 0.0 #基金份额
@@ -26,6 +29,7 @@ class FundIncome:
     incomeTotal = 0.0 # 累计收益
     income = 0.0 #基金收益
     incomePercent = 0.0 #收益率
+    incomeDay = 0.0 #当日收益
 
 class FundTransData:
     date = ""
@@ -107,13 +111,23 @@ class FundInfo:
         totalCost = 0.0
         cost = 0.0
         transIncome = 0.0
+        lastDayLjjz = 0.0
 
         for price in self.price:
+            incomeDay = 0.0
+
+            # 每日收益
+            if lastDayLjjz == 0.0:
+                incomeDay = 0.0
+            else:
+                incomeDay = (price.ljjz - lastDayLjjz) * units
+            lastDayLjjz = price.ljjz
+
             for trans in self.transData:
                 if price.date == trans.date:
                     # 添加交易数据
                     units = units + trans.units
-                    if trans.units > 0:
+                    if trans.units >= 0:
                         totalCost = totalCost + trans.cost
                     else :
                         totalCost = cost * units
@@ -148,8 +162,11 @@ class FundInfo:
             income.totalCost = round(income.totalCost, 2)
             income.incomePercent = round(income.incomePercent, 2)
             income.cost = round(income.cost, 2)
+            if income.units == 0.0:
+                income.cost = 0.0
             income.units = round(income.units, 2)
             income.incomeTotal = round(income.incomeTotal, 2)
+            income.incomeDay = round(incomeDay, 2)
 
             #print(income.totalCost, income.income, income.incomePercent, income.incomeTotal)
 
@@ -162,23 +179,126 @@ class FundInfo:
         with open(filename, "w", newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(["date", "jjjz", "ljjz", "rate", "units", "totalCost", \
-                "cost", "incomeTotal", "income", "incomePercent"])
+                "cost", "incomeTotal", "income", "incomePercent", "incomeDay"])
 
             index = 0
             for price in self.price:
                 income = self.income[index]
                 writer.writerow([getTimeStr(price.date), price.jjjz, price.ljjz, price.rate, income.units, income.totalCost,\
-                    income.cost, income.incomeTotal, income.income, income.incomePercent])
+                    income.cost, income.incomeTotal, income.income, income.incomePercent, income.incomeDay])
                                 
                 index = index + 1
         return
+    
+    def calcYearRate(self):
+        # 一年按照254天交易日算，不到一年的数据按照比例计算
+        Y1 = 245
+        Y3 = 245 * 3
+        Y5 = 245 * 5
+        count = len(self.price)
 
+        rateYear1 = 0.0
+        rateYear3 = 0.0
+        rateYear5 = 0.0
+
+        index = count - 1
+
+        if count < Y1:
+            rateYear1 = (self.price[index].ljjz - self.price[0].ljjz) * Y1 * 100 / (count * self.price[0].jjjz)
+            rateYear3 = rateYear1 * 3
+            rateYear5 = rateYear1 * 5
+        elif count < Y3:
+            rateYear1 = (self.price[index].ljjz - self.price[count - Y1].ljjz) * 100 / self.price[count - Y1].jjjz
+            rateYear3 = (self.price[index].ljjz - self.price[0].ljjz) * Y3 * 100 / (count * self.price[0].jjjz)
+            rateYear5 = rateYear3 * 5 / 3
+        elif count < Y5:
+            rateYear1 = (self.price[index].ljjz - self.price[count - Y1].ljjz) * 100 / self.price[count - Y1].jjjz
+            rateYear3 = (self.price[index].ljjz - self.price[count - Y3].ljjz) * 100 / self.price[count - Y3].jjjz
+            rateYear5 = (self.price[index].ljjz - self.price[0].ljjz) * Y5 * 100 / (count * self.price[0].jjjz)
+        else:
+            #print(count, self.price[index].ljjz, self.price[count - Y1].ljjz, self.price[count - Y1].jjjz, getTimeStr(self.price[count - Y1].date))
+            rateYear1 = (self.price[index].ljjz - self.price[count - Y1].ljjz) * 100 / self.price[count - Y1].jjjz
+            rateYear3 = (self.price[index].ljjz - self.price[count - Y3].ljjz) * 100 / self.price[count - Y3].jjjz
+            rateYear5 = (self.price[index].ljjz - self.price[count - Y5].ljjz) * 100 / self.price[count - Y5].jjjz     
+
+        return round(rateYear1, 2), round(rateYear3, 2), round(rateYear5, 2)
+
+    def monitorRate(self):
+
+        return
+
+class FundRateMonitor:
+    monitorDay = 10
+    monitorRate = -5.0
+
+    monitorResult = []
+
+    def __init__(self):
+        monitorResult = []
+        return
+
+    def rateMonitor(self, price):
+        index = len(price) - 1
+        if len(price) < self.monitorDay:
+            return 0.0, False
+        
+        rate = (price[index].ljjz - price[index - self.monitorDay].ljjz) * 100 / price[index - self.monitorDay].jjjz
+        rate = round(rate, 2)
+        if rate <= self.monitorRate:
+            return rate, True
+
+        return rate, False
+
+    def monitor(self, price, code):
+        rate, result = self.rateMonitor(price)
+        self.monitorResult.append([code, rate, result])
+        return
+    
+    def writeMonitorResult(self, baseDir):
+        filename = baseDir + "monitor_rate.csv"
+        with open(filename, "w", newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["code", "rate", "result"])
+            writer.writerows(self.monitorResult)
+        return
+
+class FundBasicInfo:
+    code = ""
+    name = ""
+    type = ""
+    riskLevel = ""
+    incomeTotal = 0.0
+    income = 0.0
+    incomePercent = 0.0
+    cost = 0.0
+
+    def __init__(self, code):
+        self.code = code
+        incomeTotal = 0.0
+        income = 0.0
+        incomePercent = 0.0
+        cost = 0.0
+        return
+
+    def getBasicInfo(self, dir):
+        path = dir + "funds.csv"
+        csvReader = csv.reader(open(path, encoding='utf-8'))
+        for item in csvReader:
+            if self.code == item[0]:
+                self.name = item[1]
+                self.type = item[2]
+                self.riskLevel = item[3]
+                return
+        return
 
 def calcAll(baseDir):
     fundList = []
     path = baseDir + "fund_transaction.csv"
     csvReader = csv.reader(open(path, encoding='utf-8'))
     lineCount = 0
+    rateMonitor = FundRateMonitor()
+    fundInfoList = []
+
     for line in csvReader:
         if lineCount == 0:
             lineCount = lineCount + 1
@@ -194,7 +314,12 @@ def calcAll(baseDir):
             continue
 
         fundList.append(fundCode)
-    
+        basicInfo = FundBasicInfo(fundCode)
+        basicInfo.getBasicInfo(baseDir)
+        fundInfoList.append(basicInfo)
+
+    rateYear = []
+
     for code in fundList:
         print("calc code =", code)
         fundInfo = FundInfo(code)
@@ -202,7 +327,36 @@ def calcAll(baseDir):
         fundInfo.readData()
         fundInfo.calcIncome()
         fundInfo.writeIncomeData()
+        rateY1, rateY3, rateY5 = fundInfo.calcYearRate()
+        rateYear.append([code, rateY1, rateY3, rateY5])
+        rateMonitor.monitor(fundInfo.price, code)
 
+        for item in fundInfoList:
+            if item.code == code:
+                index = len(fundInfo.income) - 1
+                income = fundInfo.income[index]
+                item.incomeTotal = income.incomeTotal
+                item.income = income.income
+                item.incomePercent = income.incomePercent
+                item.cost = income.totalCost
+                print(item.cost)
+
+    filename = baseDir + "rate_year.csv"
+    with open(filename, "w", newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["code", "rateY1", "rateY3", "rateY5"])
+        writer.writerows(rateYear)
+
+    filename = baseDir + "index_info.csv"
+    with open(filename, "w", encoding='utf-8', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["code", "name", "type", "riskLevel", "incomeTotal", "income", "incomePercent", "cost"])
+        for item in fundInfoList:
+            writer.writerow([item.code, item.name, item.type, item.riskLevel,\
+                 item.incomeTotal, item.income, item.incomePercent, item.cost])
+
+
+    rateMonitor.writeMonitorResult(baseDir)
     return
         
 

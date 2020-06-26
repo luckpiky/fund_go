@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{.name}}</title>
+    <script src="/static/echarts.js"></script>
+</head>
+<body>
+
+
+<table>
+    <tr>
+        <td valign="top">
+            <table border="0" cellspacing="10" cellpadding="0">
+                <tr>
+                    <td><b>基金编码：</b></td>
+                    <td>{{code}}</td>
+                </tr>
+                <tr>
+                    <td><b>基金名称：</b></td>
+                    <td>{{name}}</td>
+                </tr>
+                <tr>
+                    <td><b>基金类型：</b></td>
+                    <td>{{.type}}</td>
+                </tr>
+                <tr>
+                    <td><b>累计收益：</b></td>
+                    <td>{{incomeTotal}}</td>
+                </tr>
+                <tr>
+                    <td><b>持有份额：</b></td>
+                    <td>{{units}}</td>
+                </tr>
+                <tr>
+                    <td><b>持有收益：</b></td>
+                    <td>{{income}} | {{incomePercent}}%</td>
+                </tr>
+                <tr>
+                    <td><b>成本：</b></td>
+                    <td>{{totalCost}}</td>
+                </tr>
+                <tr>
+                    <td><b>最新价格：</b></td>
+                    <td>{{trans.date}} : {{price.jjjz}} | {{price.ljjz}} | {{price.rate}}%</td>
+                </tr>
+
+                <tr>
+                    <td><b>1，3，5年收益率：</b></td>
+                    <td>{{rateY1}}% ， {{rateY3}}% ，{{rateY5}}%</td>
+                </tr>
+
+                <tr>
+                    <td><b>购买监控：</b></td>
+                    <td>{{rateMonitor}}% ：{{rateMonitorResult}}</td>
+                </tr>
+                
+                
+            </table>
+        </td>
+        <td><div id="costList" style="width: 600px;height:400px;"></div></td>
+    </tr>
+    <tr>
+        <td><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
+        <td><div id="main" style="width: 600px;height:400px;"></div></td>
+    </tr>
+</table>
+</body>
+</html>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '历史增长数据'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data:['基金净值','累计净值']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: [
+                {% for item in data %}
+                '{{item.date}}',
+                {% endfor %}
+                ]
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name:'基金净值',
+                type:'line',
+                stack: '总量',
+                data:[
+                    {% for item in data %}
+                    '{{item.price.jjjz}}',
+                    {% endfor %}
+                    ]
+            },
+            {
+                name:'累计净值',
+                type:'line',
+                data:[
+                    {% for item in data %}
+                    '{{item.price.ljjz}}',
+                    {% endfor %}
+                    ]
+            },
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('costList'));
+
+    // 指定图表的配置项和数据
+    option = {
+        title : {
+            text: '成本',
+        },
+        tooltip : {
+            trigger: 'axis'
+        },
+        legend: {
+            data:['成本','月份']
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                mark : {show: true},
+                dataView : {show: true, readOnly: false},
+                magicType : {show: true, type: ['line', 'bar']},
+                restore : {show: true},
+                saveAsImage : {show: true}
+            }
+        },
+        calculable : true,
+        xAxis : [
+            {
+                type : 'category',
+                data : [
+                        {% for item in data %}
+                        '{{item.date}}',
+                        {% endfor %}
+                        ]
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'成本',
+                type:'bar',
+                data:[
+                    {% for item in data %}
+                    '{{item.income.totalCost}}',
+                    {% endfor %}
+                    ],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+
+
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('monthIncome'));
+
+    // 指定图表的配置项和数据
+    option = {
+        title : {
+            text: '月收益',
+        },
+        tooltip : {
+            trigger: 'axis'
+        },
+        legend: {
+            data:['收益','月份']
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                mark : {show: true},
+                dataView : {show: true, readOnly: false},
+                magicType : {show: true, type: ['line', 'bar']},
+                restore : {show: true},
+                saveAsImage : {show: true}
+            }
+        },
+        calculable : true,
+        xAxis : [
+            {
+                type : 'category',
+                data : [
+                    {% for item in incomeMonth %}
+                    '{{item.0}}',
+                    {% endfor %}
+                    ]
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'收益',
+                type:'bar',
+                data:[
+                    {% for item in incomeMonth %}
+                    '{{item.1}}',
+                    {% endfor %}
+                    ],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>

@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>我的基金列表</title>
-    <script src="js/echarts.js"></script>
+    <script src="/static/echarts.js"></script>
 </head>
 <body>
 
+<table border="0" cellspacing="5" cellpadding="0" valign="top">
+    <tr>
+        <td align="center">
+            <font color="red">{{warning}}</font>
+        </td>
+    </tr>
+</table>
 
 <table>
     <tr>
@@ -20,26 +27,19 @@
                                     <table border="0" cellspacing="5" cellpadding="0" valign="top">
                                         <tr>
                                             <td><b>基金数量：</b></td>
-                                            <td>{{.num}}</td>
+                                            <td>{{fundNum}}</td>
                                         </tr>
                                         <tr>
                                             <td><b>累计收益：</b></td>
-                                            <td>{{.accumulatedIncome}} {{.accumulatedIncomePercent}}%</td>
+                                            <td>{{incomeTotal}} {{incomeTotalPercent}}%</td>
                                         </tr>
                                         <tr>
                                             <td><b>持有收益：</b></td>
-                                            <td>{{.handlingIncome}} {{.handlingIncomePercent}}%</td>
+                                            <td>{{income}} {{incomePercent}}%</td>
                                         </tr>
                                         <tr>
                                             <td><b>成本：</b></td>
-                                            <td>{{.cost}}</td>
-                                        </tr>
-                                    </table>
-                                </td>
-                                <td>
-                                    <table border="0" align="right"  width="300">
-                                        <tr align="right">
-                                            <td valign="top"><iframe src="update.html" name="框架标识名" frameborder="边框" scrolling="yes"></iframe></td>
+                                            <td>{{cost}}</td>
                                         </tr>
                                     </table>
                                 </td>
@@ -61,14 +61,14 @@
                                             <td><b>收益率</b></td>
                                             <td><b>成本</b></td>
                                         </tr>
-                                        {{range .fundTypes}}
+                                        {% for type in types %}
                                         <tr>
-                                            <td>{{.Name}}</td>
-                                            <td>{{.Income}}</td>
-                                            <td>{{.AccumulatedIncomePercent}}%</td>
-                                            <td>{{.Cost}}</td>
+                                            <td>{{type.0}}</td>
+                                            <td>{{type.2}}</td>
+                                            <td>{{type.3}}%</td>
+                                            <td>{{type.1}}</td>
                                         </tr>
-                                        {{end}}
+                                        {% endfor %}
                                     </table>
                                 </td>
                                 <td>
@@ -79,14 +79,14 @@
                                             <td><b>收益率</b></td>
                                             <td><b>成本</b></td>
                                         </tr>
-                                        {{range .fundRisk}}
+                                        {% for risk in risks %}
                                         <tr>
-                                            <td>{{.Name}}</td>
-                                            <td>{{.Income}}</td>
-                                            <td>{{.AccumulatedIncomePercent}}%</td>
-                                            <td>{{.Cost}}</td>
+                                            <td>{{risk.0}}</td>
+                                            <td>{{risk.2}}</td>
+                                            <td>{{risk.3}}%</td>
+                                            <td>{{risk.1}}</td>
                                         </tr>
-                                        {{end}}
+                                        {% endfor %}
                                     </table>
                                 </td>
                             </tr>
@@ -108,19 +108,19 @@
                                 <td><b>成本</b></td>
                                 <td><b>操作</b></td>
                             </tr>
-                            {{range .funds}}
+                            {% for fund in funds %}
                             <tr>
-                                <td>{{.Code}}</td>
-                                <td>{{.Name}}</td>
-                                <td>{{.FundType}}</td>
-                                <td>{{.Risk}}</td>
-                                <td>{{.AccumulatedIncome}}</td>
-                                <td>{{.HandlingIncome}}</td>
-                                <td>{{.HandlingIncomePercent}}%</td>
-                                <td>{{.Cost}}</td>
-                                <td><a href="http://127.0.0.1:8000/fundinfo/{{.Code}}/">查看</a></td>
+                                <td>{{fund.0}}</td>
+                                <td>{{fund.1}}</td>
+                                <td>{{fund.2}}</td>
+                                <td>{{fund.3}}</td>
+                                <td>{{fund.4}}</td>
+                                <td>{{fund.5}}</td>
+                                <td>{{fund.6}}%</td>
+                                <td>{{fund.7}}</td>
+                                <td><a href="/fundinfo/{{fund.0}}/">查看</a></td>
                             </tr> 
-                            {{end}}
+                            {% endfor %}
                         </table>
                     </td>
 
@@ -174,7 +174,7 @@
         xAxis : [
             {
                 type : 'category',
-                data : [{{range .monthIncome}}'{{.Date | convertmonth}}',{{end}}]
+                data : [{{ .monthIncome}}'{{.Date}}',{{end}}]
             }
         ],
         yAxis : [
@@ -186,7 +186,7 @@
             {
                 name:'月收益',
                 type:'bar',
-                data:[{{range .monthIncome}}'{{.Income}}',{{end}}],
+                data:[{{ .monthIncome}}'{{.Income}}',{{end}}],
             }
         ]
     };
@@ -224,7 +224,7 @@
         xAxis : [
             {
                 type : 'category',
-                data : [{{range .monthIncomePercent}}'{{.Date | convertmonth}}',{{end}}]
+                data : [{{ .monthIncomePercent}}'{{.Date}}',{{end}}]
             }
         ],
         yAxis : [
@@ -236,7 +236,7 @@
             {
                 name:'月收益率',
                 type:'line',
-                data:[{{range .monthIncomePercent}}'{{.Income}}',{{end}}],
+                data:[{{ .monthIncomePercent}}'{{.Income}}',{{end}}],
             }
         ]
     };
@@ -280,9 +280,9 @@
                     }
                 },
                 data:[
-                    {{range .fundTypes}}
-                        {value:{{.Cost}}, name:'{{.Name}}'},
-                    {{end}}
+                    {% for type in types %}
+                        {value:{{type.1}}, name:'{{type.0}}'},
+                    {% endfor %}
                 ]
             },
             {
@@ -334,9 +334,9 @@
                     }
                 },
                 data:[
-                    {{range .fundTypeItems}}
-                        {value:{{.Cost}}, name:'{{.Name}}'},
-                    {{end}}
+                    {% for item in typeItems %}
+                        {value:{{item.1}}, name:'{{item.0}}'},
+                    {% endfor %}
                 ]
             }
         ]
