@@ -23,7 +23,7 @@ def readTransData(code):
             continue
 
         # 跳过没有购买的日期
-        if float(line[4]) == 0.0 and canAdd:
+        if float(line[4]) == 0.0 and canAdd != True:
             continue
         canAdd = True
 
@@ -111,6 +111,13 @@ def readFundBasicInfo():
         fundlist.append(item)
     return fundlist
 
+def getFundBasicInfo(code):
+    info = readFundBasicInfo()
+    for item in info:
+        if item[0] == code:
+            return item
+    return None
+
 # Create your views here.
 def getFundInfo(request, code):
     #code = request.GET.get("code")
@@ -123,6 +130,8 @@ def getFundInfo(request, code):
     incomeMonth = getMonthIncome(fundinfo.transData)
 
     last = len(fundinfo.transData) - 1
+
+    info['info'] = getFundBasicInfo(code)
 
     info['incomeTotal'] = fundinfo.transData[last].income.incomeTotal
     info['income'] = fundinfo.transData[last].income.income
@@ -208,12 +217,29 @@ def getWarning(fundList):
         return None
     for item in csvReader:
         if item[2] == 'True':
-            info = info + getFundName(item[0], fundList) + " " + item[1]
+            info = info + getFundName(item[0], fundList) + " " + item[1] + ";"
     return info
+
+def fundListOrderKey(fundList):
+    return float(fundList[7])
+
+def getMonthInome():
+    income = []
+    path = settings.CSV_DIR + "month_income.csv"
+    csvReader = None
+    try:
+        csvReader = csv.reader(open(path, encoding='utf-8'))
+    except:
+        return None
+
+    for item in csvReader:
+        income.append([item[0], item[1]])
+    return income
 
 def getIndex(request):
 
     fundList = readFundBasicInfo()
+    fundList.sort(key=fundListOrderKey, reverse=True)
 
     print(len(fundList))
 
@@ -248,5 +274,7 @@ def getIndex(request):
     info['typeItems'] = getFundCostByTypeOrder(info['types'], fundList)
 
     info['warning'] = getWarning(fundList)
+
+    info['monthIncome'] = getMonthInome()
 
     return render(request,"index.html", info)

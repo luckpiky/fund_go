@@ -174,7 +174,11 @@
         xAxis : [
             {
                 type : 'category',
-                data : [{{ .monthIncome}}'{{.Date}}',{{end}}]
+                data : [
+                    {% for income in monthIncome %}
+                    '{{income.0}}',
+                    {% endfor %}
+                    ]
             }
         ],
         yAxis : [
@@ -186,7 +190,11 @@
             {
                 name:'月收益',
                 type:'bar',
-                data:[{{ .monthIncome}}'{{.Income}}',{{end}}],
+                data:[
+                    {% for income in monthIncome %}
+                    '{{income.1}}',
+                    {% endfor %}
+                    ],
             }
         ]
     };

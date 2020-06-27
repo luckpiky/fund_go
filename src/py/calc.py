@@ -223,14 +223,11 @@ class FundInfo:
 
         return round(rateYear1, 2), round(rateYear3, 2), round(rateYear5, 2)
 
-    def monitorRate(self):
-
-        return
-
 class FundRateMonitor:
     monitorDay = 10
-    monitorRate = -5.0
-
+    monitorRate1 = -5
+    monitorRate2 = 5
+ 
     monitorResult = []
 
     def __init__(self):
@@ -244,7 +241,8 @@ class FundRateMonitor:
         
         rate = (price[index].ljjz - price[index - self.monitorDay].ljjz) * 100 / price[index - self.monitorDay].jjjz
         rate = round(rate, 2)
-        if rate <= self.monitorRate:
+        if rate <= self.monitorRate1 or rate >= self.monitorRate2:
+            print("warning: find rate exception!")
             return rate, True
 
         return rate, False
@@ -260,6 +258,7 @@ class FundRateMonitor:
             writer = csv.writer(csvfile)
             writer.writerow(["code", "rate", "result"])
             writer.writerows(self.monitorResult)
+        print("write monitor result end.")
         return
 
 class FundBasicInfo:
@@ -291,6 +290,53 @@ class FundBasicInfo:
                 return
         return
 
+def getMonthStr(day):
+    tmp = day.split("-")
+    return tmp[0] + tmp[1]
+
+def getMonthIncomeNode(date, monthIncome):
+    month = getMonthStr(getTimeStr(date))
+    for item in monthIncome:
+        if item[0] == month:
+            return item
+    monthIncome.append([month, 0.0])
+    index = len(monthIncome) - 1
+    return monthIncome[index]
+
+def cmpKeyMonthIncome(monthIncomeNode):
+    return monthIncomeNode[0]
+
+# 计算每个月的总收入
+def calcMonthIncome(incomeList, fundInfo):
+    index = 0
+    for item in fundInfo.price:
+        node = getMonthIncomeNode(item.date, incomeList)
+        node[1] = node[1] + float(fundInfo.income[index].totalCost * item.rate / 100)
+        index = index + 1
+    return
+
+
+def writeMonthIncome(incomeList, baseDir):
+    incomeList.sort(key=cmpKeyMonthIncome, reverse=False)
+
+    #只保留最近24个月的记录
+    count = len(incomeList)
+    delCnt = count - 24
+    if delCnt > 0:
+        del incomeList[0 : delCnt]
+
+    for item in incomeList:
+        item[1] = round(item[1], 2)
+
+    filename = baseDir + "month_income.csv"
+    with open(filename, "w", newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        #writer.writerow(["month", "income"])
+        writer.writerows(incomeList)
+        print("write", len(incomeList),"month income record.")
+    return
+
+
 def calcAll(baseDir):
     fundList = []
     path = baseDir + "fund_transaction.csv"
@@ -319,17 +365,25 @@ def calcAll(baseDir):
         fundInfoList.append(basicInfo)
 
     rateYear = []
+    incomeMonthList = []
 
     for code in fundList:
-        print("calc code =", code)
+        print("calc income, code =", code)
         fundInfo = FundInfo(code)
         fundInfo.setBaseDir(baseDir)
         fundInfo.readData()
         fundInfo.calcIncome()
         fundInfo.writeIncomeData()
+
+        # 计算年收益
         rateY1, rateY3, rateY5 = fundInfo.calcYearRate()
         rateYear.append([code, rateY1, rateY3, rateY5])
+
+        # 监控涨跌阈值
         rateMonitor.monitor(fundInfo.price, code)
+
+        # 计算月收益
+        calcMonthIncome(incomeMonthList, fundInfo)
 
         for item in fundInfoList:
             if item.code == code:
@@ -339,13 +393,14 @@ def calcAll(baseDir):
                 item.income = income.income
                 item.incomePercent = income.incomePercent
                 item.cost = income.totalCost
-                print(item.cost)
+                #print(item.cost)
 
     filename = baseDir + "rate_year.csv"
     with open(filename, "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["code", "rateY1", "rateY3", "rateY5"])
         writer.writerows(rateYear)
+        print("write year rate end.")
 
     filename = baseDir + "index_info.csv"
     with open(filename, "w", encoding='utf-8', newline='') as csvfile:
@@ -354,9 +409,10 @@ def calcAll(baseDir):
         for item in fundInfoList:
             writer.writerow([item.code, item.name, item.type, item.riskLevel,\
                  item.incomeTotal, item.income, item.incomePercent, item.cost])
-
+        print("write index info end.")
 
     rateMonitor.writeMonitorResult(baseDir)
+    writeMonthIncome(incomeMonthList, baseDir)
     return
         
 
