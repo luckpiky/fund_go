@@ -3,6 +3,10 @@ import time
 import os
 import sys
 
+
+MONITOR_RATE_UP = 5.0
+MONITOR_RATE_DOWN = -5.0
+
 def getTimeStamp(timeStr):
     timeArray = time.strptime(timeStr, "%Y-%m-%d %H:%M:%S")
     timeStamp = int(time.mktime(timeArray))
@@ -197,6 +201,9 @@ class FundInfo:
         Y5 = 245 * 5
         count = len(self.price)
 
+        if count == 0:
+            return 0.0, 0.0, 0.0
+
         rateYear1 = 0.0
         rateYear3 = 0.0
         rateYear5 = 0.0
@@ -225,8 +232,8 @@ class FundInfo:
 
 class FundRateMonitor:
     monitorDay = 10
-    monitorRate1 = -5
-    monitorRate2 = 5
+    monitorRate1 = MONITOR_RATE_DOWN
+    monitorRate2 = MONITOR_RATE_UP
  
     monitorResult = []
 
@@ -387,6 +394,8 @@ def calcAll(baseDir):
 
         for item in fundInfoList:
             if item.code == code:
+                if len(fundInfo.income) == 0:
+                    continue
                 index = len(fundInfo.income) - 1
                 income = fundInfo.income[index]
                 item.incomeTotal = income.incomeTotal
