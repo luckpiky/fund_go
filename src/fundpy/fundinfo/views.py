@@ -143,6 +143,8 @@ def getFundInfo(request, code):
     info['trans'] = fundinfo.transData[last]
     info['data'] = fundinfo.transData
     info['incomeMonth'] = incomeMonth
+    print(info['info'], info['info'][7],info['totalCost'])
+    info['fundCost'] = round(info['totalCost'] / fundinfo.transData[last].income.units, 3)
     
     rateY1, rateY3, rateY5 = getRateYear(code)
     info['rateY1'] = rateY1
@@ -233,7 +235,7 @@ def getMonthInome():
         return None
 
     for item in csvReader:
-        income.append([item[0], item[1]])
+        income.append([item[0], float(item[1])])
     return income
 
 def getIndex(request):
@@ -276,5 +278,20 @@ def getIndex(request):
     info['warning'] = getWarning(fundList)
 
     info['monthIncome'] = getMonthInome()
+
+    info['lastYearIncome'] = 0.0
+    cnt = len(info['monthIncome'])
+    for i in range(cnt- 12, cnt):
+        if i < 0:
+            continue
+        info['lastYearIncome'] = info['lastYearIncome'] + info['monthIncome'][i][1]
+    info['lastYearIncome'] = round(info['lastYearIncome'], 2)
+
+    info['last2YearIncome'] = 0.0
+    for i in range(cnt- 24, cnt):
+        if i < 0:
+            continue
+        info['last2YearIncome'] = info['last2YearIncome'] + info['monthIncome'][i][1]
+    info['last2YearIncome'] = round(info['last2YearIncome'], 2)
 
     return render(request,"index.html", info)

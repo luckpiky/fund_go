@@ -25,7 +25,7 @@ SECRET_KEY = '=u-c+2jj^0!trd(yal#&j-*=)(ujysgt-&#t)b6!mxx*@e@516'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -70,7 +70,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'fundpy.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
@@ -114,6 +113,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+DATETIME_FORMAT = 'Y-m-d H:i:s'
+ 
+DATE_FORMAT = 'Y-m-d'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

@@ -7,14 +7,49 @@
 </head>
 <body>
 
-<table border="0" cellspacing="5" cellpadding="0" valign="top">
+
+
+<script type="text/javascript">
+    var isMobile = false;
+        if (window.screen.width < 800) {
+            
+            document.writeln("<style type='text/css'>");
+            document.writeln("#A1{width:100%;height:30px}");
+            document.writeln("#A2{width:100%;}");
+            document.writeln("#A3{width:100%;}");
+            document.writeln("#A4{width: 100%;height:400px;}");
+            document.writeln("</style>");
+        } else {
+            document.writeln("<style type='text/css'>");
+            document.writeln("#A1{width:100%;height:30px}");
+            document.writeln("#A2{width:40%;position:absolute; top:30px; left:51%}");
+            document.writeln("#A3{width:60%;position:absolute; top:30px;}");
+            document.writeln("</style>");
+        }
+</script>        
+
+<div id="A1">
+    <table border="0" cellspacing="5" cellpadding="0" valign="top">
+        <tr>
+            <td align="center">
+                <font color="red">{{warning}}</font>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="A2">
+<table>
     <tr>
-        <td align="center">
-            <font color="red">{{warning}}</font>
-        </td>
+        <td valign="top"><div id="monthIncome" style="width: 700px;height:450px;"></div></td>
+    </tr>
+    <tr>
+        <td valign="top"><div id="pie" style="width:700px;height:450px;"></div></td>
     </tr>
 </table>
+</div>
 
+<div id="A3">
 <table>
     <tr>
         <td>
@@ -40,6 +75,18 @@
                                         <tr>
                                             <td><b>成本：</b></td>
                                             <td>{{cost}}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td valign="top">
+                                    <table border="0" cellspacing="5" cellpadding="0" valign="top">
+                                        <tr>
+                                            <td><b>近一年收益：</b></td>
+                                            <td>{{lastYearIncome}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>近两年收益：</b></td>
+                                            <td>{{last2YearIncome}}</td>
                                         </tr>
                                     </table>
                                 </td>
@@ -128,18 +175,13 @@
             </table>
         </td>
         <td>
-            <table>
-                <tr>
-                    <td valign="top"><div id="monthIncome" style="width: 600px;height:400px;"></div></td>
-                </tr>
-                <tr>
-                    <td valign="top"><div id="pie" style="width: 600px;height:400px;"></div></td>
-                </tr>
-            </table>
+            <script type="text/javascript">
+                WritePic(false);
+            </script>
         </td>
     </tr>
 </table>
-
+</div>
 
 </body>
 </html>
