@@ -255,6 +255,17 @@ class FundRateMonitor:
             print("warning: find rate exception!")
             return rate, True
 
+        # 计算最近30个交易日的超阈值增幅
+        if len(price) < 30:
+            return 0.0, False
+        
+        curIndex = index
+        for i in range(1, 30):
+            rate = (price[index].ljjz - price[index - 1].ljjz) * 100 / price[index - 1].jjjz
+            rate = round(rate, 2)
+            print("rate ", str(i), ":", rate)
+
+
         return rate, False
 
     def monitor(self, price, code):

@@ -235,6 +235,7 @@ class FundInfo:
 
 class FundRateMonitor:
     monitorDay = 10
+    monitorDay2 = 30
     monitorRate1 = MONITOR_RATE_DOWN
     monitorRate2 = MONITOR_RATE_UP
  
@@ -246,27 +247,47 @@ class FundRateMonitor:
 
     def rateMonitor(self, price):
         index = len(price) - 1
-        if len(price) < self.monitorDay:
-            return 0.0, False
+        #if len(price) < self.monitorDay:
+        #    return 0.0, False
         
-        rate = (price[index].ljjz - price[index - self.monitorDay].ljjz) * 100 / price[index - self.monitorDay].jjjz
-        rate = round(rate, 2)
-        if rate <= self.monitorRate1 or rate >= self.monitorRate2:
-            print("warning: find rate exception!")
-            return rate, True
+        #rate = (price[index].ljjz - price[index - self.monitorDay].ljjz) * 100 / price[index - self.monitorDay].jjjz
+        #rate = round(rate, 2)
+        #if rate <= self.monitorRate1 or rate >= self.monitorRate2:
+        #    print("warning: find rate exception!")
+        #    return rate, True
 
-        return rate, False
+        # 计算最近30个交易日的超阈值增幅
+        if len(price) < self.monitorDay2:
+            return 0.0, False, 0
+        
+        curIndex = index
+        #print(price[curIndex].jjjz)
+        rate = 0.0
+        days = 0
+        for i in range(1, self.monitorDay2):
+            rate1 = (price[curIndex].ljjz - price[curIndex - i].ljjz) * 100 / price[curIndex - i].jjjz
+            rate1 = round(rate1, 2)
+
+            if abs(rate1) > abs(rate):
+                rate = rate1
+                days = i
+
+        if rate <= self.monitorRate1 or rate >= self.monitorRate2:
+            #print("rate ", str(i), ":", rate, price[curIndex].ljjz - price[curIndex - i].ljjz, price[curIndex - i].jjjz)
+            return rate, True, days
+
+        return rate, False, days
 
     def monitor(self, price, code):
-        rate, result = self.rateMonitor(price)
-        self.monitorResult.append([code, rate, result])
+        rate, result, days = self.rateMonitor(price)
+        self.monitorResult.append([code, rate, days, result])
         return
     
     def writeMonitorResult(self, baseDir):
         filename = baseDir + "monitor_rate.csv"
         with open(filename, "w", newline='') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["code", "rate", "result"])
+            writer.writerow(["code", "rate", "days", "result"])
             writer.writerows(self.monitorResult)
         print("write monitor result end.")
         return

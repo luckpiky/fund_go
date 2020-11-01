@@ -65,7 +65,8 @@ def getRateMonitor(code):
         return None
     for item in csvReader:
         if item[0] == code:
-            return float(item[1]), item[2]
+            #print("-------------", float(item[1]), item[3])
+            return float(item[1]), item[3], item[2]
 
 def getMonthStr(day):
     tmp = day.split("-")
@@ -151,9 +152,10 @@ def getFundInfo(request, code):
     info['rateY3'] = rateY3
     info['rateY5'] = rateY5
 
-    rate, result = getRateMonitor(code)
+    rate, result, days = getRateMonitor(code)
     info['rateMonitor'] = rate
     info['rateMonitorResult'] = result
+    info['rateMonitorDays'] = days
 
     return render(request,"fundinfo.html", info)
 
@@ -218,8 +220,8 @@ def getWarning(fundList):
     except:
         return None
     for item in csvReader:
-        if item[2] == 'True':
-            info = info + getFundName(item[0], fundList) + " " + item[1] + ";"
+        if item[3] == 'True':
+            info = info + getFundName(item[0], fundList) + " " + item[1] + " " + item[2] + "days;"
     return info
 
 def fundListOrderKey(fundList):
