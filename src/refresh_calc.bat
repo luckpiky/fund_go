@@ -1,0 +1,1 @@
+python py/calc.py data/csv/ all
