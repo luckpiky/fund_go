@@ -127,9 +127,9 @@ def readAllCode():
         for line in readCSV:
             if len(line) < 3:
                 continue
-            if line[3] == '高风险' or line[3] == '低风险':
+            #if line[3] == '高风险' or line[3] == '低风险':
                 #log("skip:" + str(line))
-                continue
+            #    continue
             if line[2] == 'U':
                 continue
 
